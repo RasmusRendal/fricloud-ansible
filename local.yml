@@ -10,3 +10,5 @@
             domain_admin_pass: test123
       - role: nginx
         become: yes
+      - role: docker
+        become: yes
