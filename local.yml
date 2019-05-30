@@ -1,5 +1,5 @@
 ---
-- hosts: local
+- hosts: testvm
   roles:
       - role: ldap
         become: yes
@@ -8,3 +8,5 @@
             dc_domain_top: dk
             slapd_pass: test123
             domain_admin_pass: test123
+      - role: nginx
+        become: yes

@@ -1,0 +1,8 @@
+- name: Install nginx
+  apt: pkg=nginx state=present update_cache=true
+- name: Remove default
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify:
+    - restart nginx

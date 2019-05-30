@@ -1,13 +1,13 @@
 - name: Install slapd
-  apt: pkg=slapd state=installed update_cache=true
+  apt: pkg=slapd state=present update_cache=true
   notify:
       - Restart slapd
 
 - name: Install ldap-utils
-  apt: pkg={{item}} state=installed update_cache=true
-  with_items:
-      - ldap-utils
-      - python-ldap
+  apt:
+    pkg: ['ldap-utils', 'python-ldap']
+    state: present
+    update_cache: true
 
 - name: Slapd config
   template:
@@ -77,7 +77,7 @@
 - name: ldap organization
   ldap_entry:
       dn: dc={{dc_domain}},dc={{dc_domain_top}}
-      objectClass: 
+      objectClass:
           - top
           - dcObject
           - organization
@@ -88,7 +88,7 @@
       bind_pw: "{{domain_admin_pass}}"
 
 - name: ldap org admin
-  ldap_entry: 
+  ldap_entry:
       dn: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}
       objectClass:
           - organizationalRole
@@ -126,7 +126,7 @@
       attributes:
           cn: user
           description: "Default user with no extra permissions"
-          member: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}} # Can't be empty. We should create a dummy user. 
+          member: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}} # Can't be empty. We should create a dummy user.
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
       bind_pw: "{{domain_admin_pass}}"
 
@@ -137,6 +137,6 @@
       attributes:
           cn: admin
           description: "For cool people"
-          member: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}} # Can't be empty. We should create a dummy user. 
+          member: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}} # Can't be empty. We should create a dummy user.
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
       bind_pw: "{{domain_admin_pass}}"
