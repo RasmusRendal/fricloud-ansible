@@ -1,0 +1,142 @@
+- name: Install slapd
+  apt: pkg=slapd state=installed update_cache=true
+  notify:
+      - Restart slapd
+
+- name: Install ldap-utils
+  apt: pkg={{item}} state=installed update_cache=true
+  with_items:
+      - ldap-utils
+      - python-ldap
+
+- name: Slapd config
+  template:
+      src: ldap.j2
+      dest: /etc/ldap/ldap.conf
+  notify:
+      - Restart slapd
+
+- name: slapd password
+  ldap_attr:
+      dn: olcDatabase={0}config,cn=config
+      name: olcRootPW
+      values: "{{ slapd_pass }}"
+      state: exact
+- name: slapd modules
+  ldap_attr:
+      dn: cn=module{0},cn=config
+      name: olcModuleLoad
+      values:
+          - "{1}memberof.la"
+          - "{2}refint.la"
+      state: present
+
+- name: memberof config
+  ldap_entry:
+      dn: olcOverlay={0}memberof,olcDatabase={1}mdb,cn=config
+      objectClass:
+          - olcConfig
+          - olcMemberof
+          - olcOverlayConfig
+          - top
+      attributes:
+          olcOverlay: memberof
+- name: refint config
+  ldap_entry:
+      dn: olcOverlay={1}refint,olcDatabase={1}mdb,cn=config
+      objectClass:
+          - olcConfig
+          - olcOverlayConfig
+          - olcRefintConfig
+          - top
+      attributes:
+          olcOverlay: "{1}refint"
+          olcRefintAttribute: memberof member manager owner
+
+- name: ldap domain
+  ldap_attr:
+      dn: olcDatabase={1}mdb,cn=config
+      name: "{{ item.key }}"
+      values: "{{ item.value }}"
+      state: exact
+  with_dict:
+      olcSuffix: "dc={{dc_domain}},dc={{dc_domain_top}}"
+      olcRootDN: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      olcRootPW: "{{domain_admin_pass}}"
+
+- name: ldap access
+  ldap_attr:
+      dn: olcDatabase={1}mdb,cn=config
+      name: olcAccess
+      values:
+          - "{0}to attrs=userPassword,shadowLastChange by dn=\"cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}\" write by anonymous auth by self write by * none"
+          - "{1}to dn.base=\"\" by * read"
+          - "{2}to * by dn=\"cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}\" write by * read"
+      state: exact
+
+- name: ldap organization
+  ldap_entry:
+      dn: dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass: 
+          - top
+          - dcObject
+          - organization
+      attributes:
+          o: fricloud.dk
+          dc: fricloud
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{domain_admin_pass}}"
+
+- name: ldap org admin
+  ldap_entry: 
+      dn: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass:
+          - organizationalRole
+      attributes:
+          cn: admin
+          description:
+              LDAP administrator
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{domain_admin_pass}}"
+
+- name: ldap users orgUnit
+  ldap_entry:
+      dn: ou=users,dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass: organizationalUnit
+      attributes:
+          ou: users
+          description: "Standard user group"
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{domain_admin_pass}}"
+
+- name: ldap groups orgUnit
+  ldap_entry:
+      dn: ou=Groups,dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass: organizationalUnit
+      attributes:
+          ou: Groups
+          description: "Different user roles"
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{domain_admin_pass}}"
+
+- name: ldap group user
+  ldap_entry:
+      dn: cn=user,ou=Groups,dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass: groupofnames
+      attributes:
+          cn: user
+          description: "Default user with no extra permissions"
+          member: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}} # Can't be empty. We should create a dummy user. 
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{domain_admin_pass}}"
+
+- name: ldap group admin
+  ldap_entry:
+      dn: cn=admin,ou=Groups,dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass: groupofnames
+      attributes:
+          cn: admin
+          description: "For cool people"
+          member: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}} # Can't be empty. We should create a dummy user. 
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{domain_admin_pass}}"

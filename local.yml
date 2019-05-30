@@ -1,0 +1,10 @@
+---
+- hosts: local
+  roles:
+      - role: ldap
+        become: yes
+        vars:
+            dc_domain: fricloud
+            dc_domain_top: dk
+            slapd_pass: test123
+            domain_admin_pass: test123

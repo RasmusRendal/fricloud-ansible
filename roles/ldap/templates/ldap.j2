@@ -1,0 +1,17 @@
+#
+# LDAP Defaults
+#
+
+# See ldap.conf(5) for details
+# This file should be world readable but not world writable.
+
+BASE    dc={{dc_domain}},dc={{dc_domain_top}}
+URI     ldap://ldap.{{dc_domain}}.{{dc_domain_top}} ldap://ldap-master.{{dc_domain}}.{{dc_domain_top}}:666
+
+#SIZELIMIT      12
+#TIMELIMIT      15
+#DEREF          never
+
+# TLS certificates (needed for GnuTLS)
+# TLS_CACERT      /etc/letsencrypt/live/fricloud.dk/cert.pem
+
