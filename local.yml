@@ -8,7 +8,15 @@
             dc_domain_top: dk
             slapd_pass: test123
             domain_admin_pass: test123
+        tags: ldap
       - role: nginx
         become: yes
+        tags: nginx
       - role: docker
         become: yes
+        tags: docker
+      - role: postgresql
+        become: yes
+        vars:
+            postgresql_password: TODOthisIsTerribleWeNeedAnAlternativeTODO
+        tags: database

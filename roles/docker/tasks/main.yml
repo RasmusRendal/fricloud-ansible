@@ -20,3 +20,9 @@
       pkg: docker-ce
       state: present
       update_cache: true
+
+- name: Install docker lib for python
+  apt:
+      pkg: python-docker
+      state: present
+      update_cache: true

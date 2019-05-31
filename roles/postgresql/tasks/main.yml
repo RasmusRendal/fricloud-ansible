@@ -1,0 +1,8 @@
+- name: Run postgresql docker
+  docker_container:
+      name: "psql-database"
+      image: postgres
+      published_ports:
+          127.0.0.1:5432:5432
+      env:
+          POSTGRESQL_PASSWORD: "{{ postgresql_password }}"
