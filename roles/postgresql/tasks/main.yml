@@ -1,8 +1,26 @@
+- name: Create config dir
+  file:
+      path: /root/psql-data
+      state: directory
 - name: Run postgresql docker
   docker_container:
       name: "psql-database"
       image: postgres
+      state: started
+      restart: yes
+      volumes: 
+        - /root/psql-data:/var/lib/postgresql/data
       published_ports:
           127.0.0.1:5432:5432
       env:
           POSTGRESQL_PASSWORD: "{{ postgresql_password }}"
+- name: Postgresql config
+  template:
+      src: pg_hba.j2
+      dest: /root/psql-data/pg_hba.conf
+- name: Install python lib
+  apt:
+      pkg:
+          - python-psycopg2
+      state: present
+      update_cache: true
