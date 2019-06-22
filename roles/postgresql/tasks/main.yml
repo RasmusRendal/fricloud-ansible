@@ -13,7 +13,7 @@
       published_ports:
           127.0.0.1:5432:5432
       env:
-          POSTGRESQL_PASSWORD: "{{ postgresql_password }}"
+          POSTGRES_PASSWORD: "{{ postgresql_password }}"
 - name: Postgresql config
   template:
       src: pg_hba.j2
