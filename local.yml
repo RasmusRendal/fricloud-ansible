@@ -1,5 +1,7 @@
 ---
 - hosts: testvm
+  vars:
+      postgresql_password: TODOthisIsTerribleWeNeedAnAlternativeTODO
   roles:
       - role: ldap
         become: yes
@@ -17,6 +19,9 @@
         tags: docker
       - role: postgresql
         become: yes
-        vars:
-            postgresql_password: TODOthisIsTerribleWeNeedAnAlternativeTODO
         tags: database
+      - role: gitea
+        become: yes
+        vars:
+            gitea_db_pass: hejmeddig
+        tags: gitea
