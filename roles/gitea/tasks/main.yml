@@ -2,14 +2,14 @@
   postgresql_user:
       name: gitea
       password: "{{ gitea_db_pass }}"
-      login_host: localhost
+      login_host: "{{ docker_host }}"
       login_password: "{{ postgresql_password }}"
 - name: Create db
   postgresql_db:
       name: gitea_db
       encoding: UTF-8
       owner: gitea
-      login_host: localhost
+      login_host: "{{ docker_host }}"
       login_password: "{{ postgresql_password }}"
 - name: Run gitea docker
   docker_container:
@@ -17,13 +17,18 @@
       image: gitea/gitea:latest
       state: started
       published_ports:
-          - "3000:3000"
-          - "222:22"
+          - "8000:3000"
+          - "{{ gitea_ssh_port }}:22"
       env:
           USER_UID: "1000"
           USER_GID: "1000"
           DB_TYPE: "postgres"
-          DB_HOST: "172:5432"
+          DB_HOST: "{{ docker_host }}:5432"
           DB_NAME: "gitea_db"
           DB_USER: "gitea"
           DB_PASSWD: "{{ gitea_db_pass }}"
+          SSH_DOMAIN: "{{ gitea_ssh_domain }}"
+          SSH_PORT: "{{ gitea_ssh_port }}"
+          ROOT_URL: "{{ gitea_http_url }}"
+          APP_NAME: "Fricloud gitea"
+

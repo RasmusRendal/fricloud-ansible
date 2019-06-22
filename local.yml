@@ -2,6 +2,7 @@
 - hosts: testvm
   vars:
       postgresql_password: TODOthisIsTerribleWeNeedAnAlternativeTODO
+      docker_host: 172.17.0.1
   roles:
       - role: ldap
         become: yes
@@ -23,5 +24,8 @@
       - role: gitea
         become: yes
         vars:
-            gitea_db_pass: hejmeddig
+            gitea_db_pass: "hejmeddig"
+            gitea_ssh_domain: "git.fricloud.dk"
+            gitea_ssh_port: "222"
+            gitea_http_url: "http://192.168.122.5:8000"
         tags: gitea
