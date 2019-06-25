@@ -1,3 +1,14 @@
+- name: Create ldap admin user
+  ldap_entry:
+      dn: cn=gitea-read,dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass:
+          - simpleSecurityObject
+          - organizationalRole
+      attributes:
+          cn: gitea-read
+          userPassword: "{{ gitea_ldap_pass }}"
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{ domain_admin_pass }}"
 - name: Create db user
   postgresql_user:
       name: gitea
@@ -15,6 +26,8 @@
   file:
       path: /root/gitea-data
       state: directory
+
+
 - name: Run gitea docker
   docker_container:
       name: "gitea-docker"
@@ -38,4 +51,48 @@
           APP_NAME: "Fricloud gitea"
       volumes: 
           - "{{ gitea_data_path }}:/data:rw"
+
+- pause: 
+    prompt: "Goto {{ gitea_http_url }} and install. Then continue"
+
+- name: Check if login-source exists
+  postgresql_query:
+      db: gitea_db
+      login_host: "{{ docker_host }}"
+      login_user: gitea
+      login_password: "{{ gitea_db_pass }}"
+      query: SELECT id FROM login_source WHERE name = 'fricloud-ldap'
+  register: login_source_exists
+
+- debug: 
+    var: login_source_exists
+
+- name: Add login source
+  when: login_source_exists.rowcount == 0
+  postgresql_query:
+      db: gitea_db
+      login_host: "{{ docker_host }}"
+      login_user: gitea
+      login_password: "{{ gitea_db_pass }}"
+      query: >-
+          INSERT INTO login_source ( type, name, is_actived, is_sync_enabled, created_unix, updated_unix, cfg) VALUES 
+          (2, 'fricloud-ldap', True, True, 0, 0, 
+          '{"Name":"fricloud-ldap",
+              "Host":"172.17.0.1",
+              "Port":389,
+              "SecurityProtocol":0,
+              "SkipVerify":false,
+              "BindDN":"cn=gitea-read,dc=fricloud,dc=dk",
+              "BindPassword":"hejmeddig",
+              "UserBase":"ou=users,dc=fricloud,dc=dk",
+              "UserDN":"",
+              "AttributeUsername":"uid",
+              "AttributeName":"sn",
+              "AttributeSurname":"",
+              "AttributeMail":"mail",
+              "AttributesInBind":false,
+              "AttributeSSHPublicKey":"",
+              "SearchPageSize":0,
+              "Filter":"(\u0026(uid=%s)(objectClass=person))",
+              "AdminFilter":"","Enabled":true}')
 
