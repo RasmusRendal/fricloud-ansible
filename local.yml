@@ -28,4 +28,5 @@
             gitea_ssh_domain: "git.fricloud.dk"
             gitea_ssh_port: "222"
             gitea_http_url: "http://192.168.122.5:8000"
+            gitea_data_path: "/root/gitea-data"
         tags: gitea

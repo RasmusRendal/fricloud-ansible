@@ -11,11 +11,16 @@
       owner: gitea
       login_host: "{{ docker_host }}"
       login_password: "{{ postgresql_password }}"
+- name: Create data dir
+  file:
+      path: /root/gitea-data
+      state: directory
 - name: Run gitea docker
   docker_container:
       name: "gitea-docker"
       image: gitea/gitea:latest
       state: started
+      restart_policy: "unless-stopped"
       published_ports:
           - "8000:3000"
           - "{{ gitea_ssh_port }}:22"
@@ -31,4 +36,6 @@
           SSH_PORT: "{{ gitea_ssh_port }}"
           ROOT_URL: "{{ gitea_http_url }}"
           APP_NAME: "Fricloud gitea"
+      volumes: 
+          - "{{ gitea_data_path }}:/data:rw"
 

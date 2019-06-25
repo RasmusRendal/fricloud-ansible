@@ -8,6 +8,7 @@
       image: postgres
       state: started
       restart: yes
+      restart_policy: "unless-stopped"
       volumes: 
         - /root/psql-data:/var/lib/postgresql/data
       published_ports:
