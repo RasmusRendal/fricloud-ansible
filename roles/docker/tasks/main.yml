@@ -1,6 +1,6 @@
 - name: Install dependencies
-  apt: 
-    pkg: 
+  apt:
+    pkg:
         - apt-transport-https
         - ca-certificates
         - curl
@@ -26,3 +26,14 @@
       pkg: python-docker
       state: present
       update_cache: true
+
+- name: Add daemon config
+  template:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+
+- name: Restart docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: restarted

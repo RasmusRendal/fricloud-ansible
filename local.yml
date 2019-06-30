@@ -1,5 +1,7 @@
 ---
 - hosts: testvm
+  vars:
+    docker_host: 172.17.0.1
   roles:
       - role: ldap
         become: yes
@@ -20,3 +22,6 @@
         vars:
             postgresql_password: TODOthisIsTerribleWeNeedAnAlternativeTODO
         tags: database
+      - role: prometheus
+        become: yes
+        tags: docker
