@@ -2,6 +2,9 @@
   vars_files:
     - defaults.yml
   roles:
+      - role: nftables
+        become: yes
+        tags: nft
       - role: certs
         become: yes
         tags: certs
