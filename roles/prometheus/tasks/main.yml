@@ -1,0 +1,70 @@
+- name: Create config file
+  template:
+    src: prometheus.yml
+    dest: /etc/prometheus.yml
+- name: Create prometheus docker
+  docker_container:
+    name: "prometheus"
+    image: "prom/prometheus"
+    state: started
+    restart: yes
+    volumes:
+      - /etc/prometheus.yml:/etc/prometheus/prometheus.yml
+    published_ports:
+      "0.0.0.0:9090:9090"
+- name: Create grafana directory
+  file:
+    path: /var/grafana
+    state: directory
+    mode: '0755'
+    owner: "472"
+    group: "472"
+- name: Create grafana docker
+  docker_container:
+    name: "grafana"
+    image: "grafana/grafana"
+    state: started
+    restart: yes
+    published_ports:
+      0.0.0.0:3000:3000
+    volumes:
+      /var/grafana:/var/lib/grafana
+    env:
+      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_password }}"
+- name: Install prometheus node exporter
+  apt: pkg=prometheus-node-exporter state=present update_cache=true
+- name: Create service for prometheus node exporter
+  template:
+    src: node-service.service
+    dest: /etc/systemd/system/node-exporter.service
+- name: Start prometheus node exporter service
+  systemd:
+    name: node-exporter
+    daemon_reexec: yes
+    enabled: yes
+    state: started
+- name: Set up prometheus as a data source
+  grafana_datasource:
+    name: "Prometheus"
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "admin"
+    grafana_password: "{{ grafana_password }}"
+    ds_type: "prometheus"
+    url: "http://{{ docker_host }}:9090"
+    state: present
+- name: Copy dashboard to host
+  template:
+    src: dashboard.yml
+    dest: /tmp/dashboard.yml
+- name: Install the main grafana dashboard
+  grafana_dashboard:
+    grafana_url: "http://127.0.0.1:3000"
+    grafana_user: "admin"
+    grafana_password: "{{ grafana_password }}"
+    path: "/tmp/dashboard.yml"
+    overwrite: yes
+    message: "Initial import of dashboard"
+- name: Delete dashboard again
+  file:
+    path: "/tmp/dashboard.yml"
+    state: absent
