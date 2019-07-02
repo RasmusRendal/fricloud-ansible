@@ -1,6 +1,6 @@
 - name: Create config dir
   file:
-      path: /root/psql-data
+      path: "{{postgresql_data_path}}"
       state: directory
 - name: Run postgresql docker
   docker_container:
