@@ -8,10 +8,11 @@
       image: postgres
       state: started
       restart: yes
+      restart_policy: "unless-stopped"
       volumes: 
         - /root/psql-data:/var/lib/postgresql/data
       published_ports:
-          127.0.0.1:5432:5432
+          172.17.0.1:5432:5432
       env:
           POSTGRES_PASSWORD: "{{ postgresql_password }}"
 - name: Postgresql config

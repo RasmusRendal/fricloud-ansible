@@ -1,0 +1,99 @@
+- name: Create ldap admin user
+  ldap_entry:
+      dn: cn=gitea-read,dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass:
+          - simpleSecurityObject
+          - organizationalRole
+      attributes:
+          cn: gitea-read
+          userPassword: "{{ gitea_ldap_pass }}"
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{ domain_admin_pass }}"
+- name: Create db user
+  postgresql_user:
+      name: gitea
+      password: "{{ gitea_db_pass }}"
+      login_host: "{{ docker_host }}"
+      login_password: "{{ postgresql_password }}"
+- name: Create db
+  postgresql_db:
+      name: gitea_db
+      encoding: UTF-8
+      owner: gitea
+      login_host: "{{ docker_host }}"
+      login_password: "{{ postgresql_password }}"
+- name: Create data dir
+  file:
+      path: /root/gitea-data
+      state: directory
+
+
+- name: Run gitea docker
+  docker_container:
+      name: "gitea-docker"
+      image: gitea/gitea:latest
+      state: started
+      restart_policy: "unless-stopped"
+      published_ports:
+          - "8000:3000"
+          - "{{ gitea_ssh_port }}:22"
+      env:
+          USER_UID: "1000"
+          USER_GID: "1000"
+          DB_TYPE: "postgres"
+          DB_HOST: "{{ docker_host }}:5432"
+          DB_NAME: "gitea_db"
+          DB_USER: "gitea"
+          DB_PASSWD: "{{ gitea_db_pass }}"
+          SSH_DOMAIN: "{{ gitea_ssh_domain }}"
+          SSH_PORT: "{{ gitea_ssh_port }}"
+          ROOT_URL: "{{ gitea_http_url }}"
+          APP_NAME: "Fricloud gitea"
+      volumes: 
+          - "{{ gitea_data_path }}:/data:rw"
+
+- pause: 
+    prompt: "Goto {{ gitea_http_url }} and install. Then continue"
+
+- name: Check if login-source exists
+  postgresql_query:
+      db: gitea_db
+      login_host: "{{ docker_host }}"
+      login_user: gitea
+      login_password: "{{ gitea_db_pass }}"
+      query: SELECT id FROM login_source WHERE name = 'fricloud-ldap'
+  register: login_source_exists
+
+- debug: 
+    var: login_source_exists
+
+- name: Add login source
+  when: login_source_exists.rowcount == 0
+  postgresql_query:
+      db: gitea_db
+      login_host: "{{ docker_host }}"
+      login_user: gitea
+      login_password: "{{ gitea_db_pass }}"
+      query: >-
+          INSERT INTO login_source ( type, name, is_actived, is_sync_enabled, created_unix, updated_unix, cfg) VALUES 
+          (2, 'fricloud-ldap', True, True, 0, 0, 
+          '{"Name":"fricloud-ldap",
+              "Host":"{{ docker_host }}",
+              "Port":389,
+              "SecurityProtocol":0,
+              "SkipVerify":false,
+              "BindDN":"cn=gitea-read,dc={{dc_domain}},dc={{dc_domain_top}}",
+              "BindPassword":"hejmeddig",
+              "UserBase":"ou=users,dc={{dc_domain}},dc={{dc_domain_top}}",
+              "UserDN":"",
+              "AttributeUsername":"uid",
+              "AttributeName":"sn",
+              "AttributeSurname":"",
+              "AttributeMail":"mail",
+              "AttributesInBind":false,
+              "AttributeSSHPublicKey":"",
+              "SearchPageSize":0,
+              "Filter":"(\u0026(uid=%s)(objectClass=person))",
+              "AdminFilter":"(memberof=cn=admin,ou=groups,dc={{dc_domain}},dc={{dc_domain_top}})",
+              "Enabled":true}')
+
