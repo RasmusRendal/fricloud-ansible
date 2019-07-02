@@ -78,13 +78,13 @@
           INSERT INTO login_source ( type, name, is_actived, is_sync_enabled, created_unix, updated_unix, cfg) VALUES 
           (2, 'fricloud-ldap', True, True, 0, 0, 
           '{"Name":"fricloud-ldap",
-              "Host":"172.17.0.1",
+              "Host":"{{ docker_host }}",
               "Port":389,
               "SecurityProtocol":0,
               "SkipVerify":false,
-              "BindDN":"cn=gitea-read,dc=fricloud,dc=dk",
+              "BindDN":"cn=gitea-read,dc={{dc_domain}},dc={{dc_domain_top}}",
               "BindPassword":"hejmeddig",
-              "UserBase":"ou=users,dc=fricloud,dc=dk",
+              "UserBase":"ou=users,dc={{dc_domain}},dc={{dc_domain_top}}",
               "UserDN":"",
               "AttributeUsername":"uid",
               "AttributeName":"sn",
@@ -94,5 +94,6 @@
               "AttributeSSHPublicKey":"",
               "SearchPageSize":0,
               "Filter":"(\u0026(uid=%s)(objectClass=person))",
-              "AdminFilter":"","Enabled":true}')
+              "AdminFilter":"(memberof=cn=admin,ou=groups,dc={{dc_domain}},dc={{dc_domain_top}})",
+              "Enabled":true}')
 
