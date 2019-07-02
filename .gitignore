@@ -1,5 +1,2 @@
-roles/nginx/files/new.cert.cert
-roles/nginx/files/new.cert.key
-roles/nginx/files/new.ssl.csr
+roles/nginx/files/cert.crt
 roles/nginx/files/privkey.pem
-
