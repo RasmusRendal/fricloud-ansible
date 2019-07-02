@@ -9,10 +9,10 @@
       state: started
       restart: yes
       restart_policy: "unless-stopped"
-      volumes: 
+      volumes:
         - /root/psql-data:/var/lib/postgresql/data
       published_ports:
-          172.17.0.1:5432:5432
+         "{{ docker_host }}:5432:5432"
       env:
           POSTGRES_PASSWORD: "{{ postgresql_password }}"
 - name: Postgresql config

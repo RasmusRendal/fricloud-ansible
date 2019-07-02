@@ -1,18 +1,11 @@
 ---
 - hosts: testvm
-  vars:
-        postgresql_password: TODOthisIsTerribleWeNeedAnAlternativeTODO
-        docker_host: 172.17.0.1
-        dc_domain: fricloud 
-        dc_domain_top: dk
-        domain_admin_pass: test123
-
+  vars_files:
+    defaults.yml
   roles:
       - role: ldap
         become: yes
         vars:
-            slapd_pass: test123
-            domain_admin_pass: test123
         tags: ldap
       - role: nginx
         become: yes
@@ -25,14 +18,10 @@
         tags: database
       - role: gitea
         become: yes
-        vars:
-            gitea_ldap_pass: "{crypt}$6$LqvhBougzXSERgVP$vI.v3s33.YX78R/YFTHMTEzpdOrT6IOnhN5Zr.RSWi1RsoaDk0zY8YTqCkYPQFABWdMVqR0r6dnBCBMYtZc4R1"
-            gitea_db_pass: "hejmeddig"
-            gitea_ssh_domain: "git.fricloud.dk"
-            gitea_ssh_port: "222"
-            gitea_http_url: "http://192.168.122.5:8000"
-            gitea_data_path: "/root/gitea-data"
         tags: gitea
       - role: prometheus
         become: yes
-        tags: docker
+        tags: prometheus
+      - role: nextcloud
+        become: yes
+        tags: nextcloud
