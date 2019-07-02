@@ -1,0 +1,9 @@
+#!/bin/bash
+dc_domain=$(grep -Po "dc_domain: \K.*" defaults.yml)
+dc_domain_top=$(grep -Po "dc_domain_top: \K.*" defaults.yml)
+domain="$dc_domain.$dc_domain_top"
+echo $domain
+
+openssl req -new -nodes -subj "/CN=$domain" -keyout roles/nginx/files/privkey.pem > roles/nginx/files/new.ssl.csr && \
+openssl rsa -in roles/nginx/files/privkey.pem -out roles/nginx/files/new.cert.key && \
+openssl x509 -in roles/nginx/files/new.ssl.csr -out roles/nginx/files/new.cert.cert -req -signkey roles/nginx/files/new.cert.key -days 100
