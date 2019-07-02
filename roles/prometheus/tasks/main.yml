@@ -11,7 +11,7 @@
     volumes:
       - /etc/prometheus.yml:/etc/prometheus/prometheus.yml
     published_ports:
-      "0.0.0.0:9090:9090"
+      "0.0.0.0:{{ prometheus_port }}:9090"
 - name: Create grafana directory
   file:
     path: /var/grafana
@@ -26,9 +26,9 @@
     state: started
     restart: yes
     published_ports:
-      0.0.0.0:3000:3000
+      "0.0.0.0:{{grafana_port}}:3000"
     volumes:
-      /var/grafana:/var/lib/grafana
+      "{{grafana_vol_path}}:/var/lib/grafana"
     env:
       GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_password }}"
 - name: Install prometheus node exporter
@@ -46,11 +46,11 @@
 - name: Set up prometheus as a data source
   grafana_datasource:
     name: "Prometheus"
-    grafana_url: "http://127.0.0.1:3000"
+    grafana_url: "http://127.0.0.1:{{grafana_port}}"
     grafana_user: "admin"
     grafana_password: "{{ grafana_password }}"
     ds_type: "prometheus"
-    url: "http://{{ docker_host }}:9090"
+    url: "http://{{ docker_host }}:{{prometheus_port}}"
     state: present
 - name: Copy dashboard to host
   template:
@@ -58,7 +58,7 @@
     dest: /tmp/dashboard.yml
 - name: Install the main grafana dashboard
   grafana_dashboard:
-    grafana_url: "http://127.0.0.1:3000"
+    grafana_url: "http://127.0.0.1:{{grafana_port}}"
     grafana_user: "admin"
     grafana_password: "{{ grafana_password }}"
     path: "/tmp/dashboard.yml"

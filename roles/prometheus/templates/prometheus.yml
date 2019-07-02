@@ -3,11 +3,11 @@ scrape_configs:
 
     scrape_interval: 5s
     static_configs:
-     - targets: ['localhost:9090']
+     - targets: ['localhost:{{prometheus_port}}']
   - job_name: Host
     scrape_interval: 5s
     static_configs:
-      - targets: ['{{ docker_host }}:9100']
+      - targets: ['{{ docker_host }}:{{node_export_port}}']
   - job_name: Docker
     scrape_interval: 5s
     static_configs:

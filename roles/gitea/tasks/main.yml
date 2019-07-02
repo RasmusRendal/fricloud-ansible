@@ -35,7 +35,7 @@
       state: started
       restart_policy: "unless-stopped"
       published_ports:
-          - "8000:3000"
+          - "{{ gitea_http_port }}:3000"
           - "{{ gitea_ssh_port }}:22"
       env:
           USER_UID: "1000"
@@ -83,7 +83,7 @@
               "SecurityProtocol":0,
               "SkipVerify":false,
               "BindDN":"cn=gitea-read,dc={{dc_domain}},dc={{dc_domain_top}}",
-              "BindPassword":"hejmeddig",
+              "BindPassword":"{{ gitea_ldap_pass_plain }}",
               "UserBase":"ou=users,dc={{dc_domain}},dc={{dc_domain_top}}",
               "UserDN":"",
               "AttributeUsername":"uid",

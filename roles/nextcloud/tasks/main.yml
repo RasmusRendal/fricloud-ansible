@@ -29,7 +29,7 @@
     state: started
     restart: yes
     published_ports:
-      0.0.0.0:9001:80
+      "127.0.0.1:{{ nextcloud_port }}:80"
     volumes:
       - /var/nextcloud:/var/www/html
     env:
@@ -42,7 +42,7 @@
 # The environment variables do not work, so a command is necessary. Luckily, it does only set the admin password if docker is not yet initialized
 - name: Wait for nextcloud docker to start
   wait_for:
-    port: 9001
+    port: "{{nextcloud_port}}"
     delay: 1
 - name: Install nextcloud
   shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ nextcloud_admin_password }}"

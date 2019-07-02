@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/root/
-ExecStart=/usr/bin/prometheus-node-exporter -web.listen-address {{ docker_host}}:9100
+ExecStart=/usr/bin/prometheus-node-exporter -web.listen-address {{ docker_host}}:{{ node_export_port }}
 Restart=on-failure
 
 [Install]
