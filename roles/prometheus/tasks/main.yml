@@ -64,6 +64,7 @@
     path: "/tmp/dashboard.yml"
     overwrite: yes
     message: "Initial import of dashboard"
+  ignore_errors: yes
 - name: Delete dashboard again
   file:
     path: "/tmp/dashboard.yml"

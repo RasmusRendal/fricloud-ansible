@@ -1,0 +1,15 @@
+nextcloud_ldap_password: changeme
+nextcloud_db_pass: changeme
+nextcloud_admin_password: changeme
+postgresql_password: changeme
+domain_admin_pass: changeme
+dc_domain: fricloud
+dc_domain_top: dk
+slapd_pass: test123
+docker_host: 172.17.0.1
+gitea_ldap_pass: "{crypt}$6$LqvhBougzXSERgVP$vI.v3s33.YX78R/YFTHMTEzpdOrT6IOnhN5Zr.RSWi1RsoaDk0zY8YTqCkYPQFABWdMVqR0r6dnBCBMYtZc4R1"
+gitea_db_pass: "hejmeddig"
+gitea_ssh_domain: "git.fricloud.dk"
+gitea_ssh_port: "222"
+gitea_http_url: "http://192.168.122.5:8000"
+gitea_data_path: "/root/gitea-data"
