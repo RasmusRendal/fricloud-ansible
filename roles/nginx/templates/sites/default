@@ -1,0 +1,36 @@
+server {
+	listen [::]:443 ssl; 
+	listen 443 ssl; 
+	server_name {{ full_domain }}; 
+
+	ssl_certificate {{ nginx_cert }};
+	ssl_certificate_key {{ nginx_cert_key }};
+
+	root {{ nginx_http_root }};
+
+	# Add index.php to the list if you are using PHP
+	index index.html index.htm index.nginx-debian.html;
+
+	location /submit {
+		access_log /var/log/nginx/emails.log;
+		return 200 "success";
+		#redirect "success.html";
+	}
+
+
+	location / {
+		# First attempt to serve request as file, then
+		# as directory, then fall back to displaying a 404.
+		try_files $uri $uri/ =404;
+	}
+
+}
+
+server {
+	listen 80 ;
+	listen [::]:80 ;
+	server_name {{ full_domain }};
+
+	# redirect to https
+	return 301 https://$host$request_uri;
+}

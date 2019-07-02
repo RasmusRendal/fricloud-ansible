@@ -6,3 +6,14 @@
     state: absent
   notify:
     - restart nginx
+- name: Copy config template
+  template:
+      src: sites/default
+      dest: /etc/nginx/sites-available
+- name: Symlink config
+  file:
+      src: /etc/nginx/sites-available/default
+      dest: /etc/nginx/sites-enabled/default
+      state: link
+  notify:
+      - restart nginx
