@@ -6,7 +6,7 @@ server {
 	ssl_certificate {{ nginx_cert }};
 	ssl_certificate_key {{ nginx_cert_key }};
 
-	root {{ nginx_http_root }};
+	root /usr/share/nginx/html;
 
 	# Add index.php to the list if you are using PHP
 	index index.html index.htm index.nginx-debian.html;
