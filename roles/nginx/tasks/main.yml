@@ -17,3 +17,11 @@
       state: link
   notify:
       - restart nginx
+- name: Copy ssl cert
+  copy:
+      src: "{{ local_cert_path }}"
+      dest: "{{ nginx_cert }}"
+- name: Copy ssl key
+  copy:
+      src: "{{ local_cert_key_path }}"
+      dest: "{{ nginx_cert_key }}"

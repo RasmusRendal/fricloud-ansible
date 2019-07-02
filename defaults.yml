@@ -31,6 +31,8 @@ postgresql_data_path: "/root/psql-data"
 grafana_vol_path: "/var/grafana"
 
 # Paths
+local_cert_path: "roles/nginx/files/new.cert.cert"
+local_cert_key_path: "roles/nginx/files/new.cert.key"
 nginx_cert: "/etc/ssl/certs/server.crt"
 nginx_cert_key: "/etc/ssl/private/server.key"
 nginx_http_root: "/var/www/html"
