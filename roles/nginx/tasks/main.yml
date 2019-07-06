@@ -1,8 +1,36 @@
-- name: Install nginx
-  apt: pkg=nginx state=present update_cache=true
-- name: Remove default
+- name: Create nginx config path
   file:
-    path: /etc/nginx/sites-enabled/default
-    state: absent
-  notify:
-    - restart nginx
+      path: "{{ nginx_sites_vol_path }}"
+      state: directory
+- name: Place config
+  template:
+      src: nginx.conf
+      dest: /root/nginx.conf
+- name: Copy default site template
+  template:
+      src: sites/default
+      dest: "{{ nginx_sites_vol_path}}"
+- name: Copy ssl cert
+  copy:
+      src: "{{ local_cert_path }}"
+      dest: "{{ nginx_cert }}"
+- name: Copy ssl key
+  copy:
+      src: "{{ local_cert_key_path }}"
+      dest: "{{ nginx_cert_key }}"
+- name: Start nginx docker
+  docker_container:
+      name: "nginx-docker"
+      image: "nginx"
+      state: started
+      restart: yes
+      restart_policy: "unless-stopped"
+      volumes:
+          - "{{ nginx_sites_vol_path }}:/etc/nginx/sites-enabled:ro"
+          - "{{ nginx_cert_key }}:{{ nginx_cert_key }}:ro"
+          - "{{ nginx_cert }}:{{ nginx_cert }}:ro"
+          - "/root/nginx.conf:/etc/nginx/nginx.conf:ro"
+          - "{{ nginx_http_root }}:/usr/share/nginx/html:ro"
+      published_ports:
+          - "{{ nginx_http_port }}:80"
+          - "{{ nginx_https_port }}:443"

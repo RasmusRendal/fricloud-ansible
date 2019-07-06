@@ -82,8 +82,8 @@
           - dcObject
           - organization
       attributes:
-          o: fricloud.dk
-          dc: fricloud
+          o: "{{ full_domain }}"
+          dc: "{{ dc_domain }}"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
       bind_pw: "{{domain_admin_pass}}"
 

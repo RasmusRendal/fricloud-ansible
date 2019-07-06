@@ -10,10 +10,11 @@ gitea_ldap_pass_plain: hejmeddig
 gitea_db_pass: "hejmeddig"
 
 # Network
-dc_domain: fricloud
+dc_domain: fricloudtest
 dc_domain_top: dk
+full_domain: "{{dc_domain}}.{{dc_domain_top}}"
 docker_host: 172.17.0.1
-gitea_ssh_domain: "git.fricloud.dk"
+gitea_ssh_domain: "git.{{ full_domain }}"
 gitea_http_url: "http://192.168.122.5:8000"
 gitea_ssh_port: "222"
 gitea_http_port: "8000"
@@ -23,8 +24,18 @@ prometheus_port: "9090"
 grafana_port: 3000
 node_export_port: "9100"
 docker_metrics_port: "9323"
+nginx_http_port: 80
+nginx_https_port: 443
 
-# Paths
+# Docker volumes
 gitea_data_path: "/root/gitea-data"
 postgresql_data_path: "/root/psql-data"
 grafana_vol_path: "/var/grafana"
+nginx_sites_vol_path: "/var/nginx/sites-enabled"
+
+# Paths
+local_cert_path: "roles/nginx/files/cert.crt"
+local_cert_key_path: "roles/nginx/files/privkey.pem"
+nginx_cert: "/etc/ssl/certs/server.crt"
+nginx_cert_key: "/etc/ssl/private/server.key"
+nginx_http_root: "/var/www/html"

@@ -1,0 +1,2 @@
+roles/nginx/files/cert.crt
+roles/nginx/files/privkey.pem

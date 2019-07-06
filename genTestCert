@@ -1,0 +1,16 @@
+#!/bin/bash
+dc_domain=$(grep -Po "dc_domain: \K.*" defaults.yml)
+dc_domain_top=$(grep -Po "dc_domain_top: \K.*" defaults.yml)
+domain="$dc_domain.$dc_domain_top"
+cert_loc="/usr/share/pki/ca-trust-source/anchors/fricloudtest.crt"
+echo $domain
+
+openssl req -x509 -nodes -subj "/CN=$domain" -keyout roles/nginx/files/privkey.pem -out roles/nginx/files/cert.crt
+
+echo "# fricloud test script" | sudo tee $cert_loc
+cat roles/nginx/files/cert.crt | sudo tee $cert_loc
+sudo update-ca-trust
+
+echo "Please enter server ip for dns record"
+read serverip
+echo "$serverip $domain" | sudo tee -a /etc/hosts

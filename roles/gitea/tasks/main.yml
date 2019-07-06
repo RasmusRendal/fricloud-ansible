@@ -49,10 +49,10 @@
           SSH_PORT: "{{ gitea_ssh_port }}"
           ROOT_URL: "{{ gitea_http_url }}"
           APP_NAME: "Fricloud gitea"
-      volumes: 
+      volumes:
           - "{{ gitea_data_path }}:/data:rw"
 
-- pause: 
+- pause:
     prompt: "Goto {{ gitea_http_url }} and install. Then continue"
 
 - name: Check if login-source exists
@@ -61,10 +61,10 @@
       login_host: "{{ docker_host }}"
       login_user: gitea
       login_password: "{{ gitea_db_pass }}"
-      query: SELECT id FROM login_source WHERE name = 'fricloud-ldap'
+      query: SELECT id FROM login_source WHERE name = '{{ dc_domain }}-ldap'
   register: login_source_exists
 
-- debug: 
+- debug:
     var: login_source_exists
 
 - name: Add login source
@@ -75,9 +75,9 @@
       login_user: gitea
       login_password: "{{ gitea_db_pass }}"
       query: >-
-          INSERT INTO login_source ( type, name, is_actived, is_sync_enabled, created_unix, updated_unix, cfg) VALUES 
-          (2, 'fricloud-ldap', True, True, 0, 0, 
-          '{"Name":"fricloud-ldap",
+          INSERT INTO login_source ( type, name, is_actived, is_sync_enabled, created_unix, updated_unix, cfg) VALUES
+          (2, '{{ dc_domain }}', True, True, 0, 0,
+          '{"Name":"{{ dc_domain }}",
               "Host":"{{ docker_host }}",
               "Port":389,
               "SecurityProtocol":0,
