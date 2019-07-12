@@ -43,6 +43,12 @@
     daemon_reexec: yes
     enabled: yes
     state: started
+- name: Wait for grafana to be up
+  shell: "/usr/bin/curl localhost:{{ grafana_port }}"
+  register: result
+  retries: 20
+  delay: 3
+  until: result.rc == 0
 - name: Set up prometheus as a data source
   grafana_datasource:
     name: "Prometheus"
