@@ -12,7 +12,7 @@
       volumes:
         - "{{ postgresql_data_path }}:/var/lib/postgresql/data"
       published_ports:
-         "{{ docker_host }}:{{ postgresql_port }}:5432"
+         "0.0.0.0:{{ postgresql_port }}:5432"
       env:
           POSTGRES_PASSWORD: "{{ postgresql_password }}"
 - name: Postgresql config
@@ -25,3 +25,9 @@
           - python-psycopg2
       state: present
       update_cache: true
+- name: Wait for postgresql to be up
+  shell: "if pg_isready -h localhost -p {{ postgresql_port }}; then echo it works; fi"
+  register: result
+  retries: 20
+  delay: 10
+  until: result.stdout.find("it works")
