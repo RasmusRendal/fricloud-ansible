@@ -25,3 +25,6 @@
       - role: nextcloud
         become: yes
         tags: nextcloud
+      - role: matrix
+        become: yes
+        tags: matrix

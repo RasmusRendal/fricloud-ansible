@@ -21,11 +21,14 @@
       state: present
       update_cache: true
 
-- name: Install docker lib for python
+- name: Install python pip
   apt:
-      pkg: python-docker
+      pkg: python-pip
       state: present
       update_cache: true
+
+- name: Install docker lib for python
+  command: pip install docker
 
 - name: Add daemon config
   template:
