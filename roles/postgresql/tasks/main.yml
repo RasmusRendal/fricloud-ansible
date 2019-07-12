@@ -26,8 +26,8 @@
       state: present
       update_cache: true
 - name: Wait for postgresql to be up
-  shell: "if pg_isready -h localhost -p {{ postgresql_port }}; then echo it works; fi"
+  shell: "/usr/bin/pg_isready -h localhost -p {{ postgresql_port }}"
   register: result
   retries: 20
-  delay: 10
-  until: result.stdout.find("it works")
+  delay: 3
+  until: result.rc == 0
