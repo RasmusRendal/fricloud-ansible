@@ -1,0 +1,129 @@
+# Sample configuration file explaining the minimum required keys to be set to run mxisd
+#
+# For a complete list of options, see https://github.com/kamax-matrix/mxisd/docs/README.md
+#
+# Please follow the Getting Started guide if this is your first time using/configuring mxisd
+#
+#  -- https://github.com/kamax-matrix/mxisd/blob/master/docs/getting-started.md#getting-started
+#
+
+#######################
+# Matrix config items #
+#######################
+# Matrix domain, same as the domain configure in your Homeserver configuration.
+# NOTE: in Synapse Homeserver, the Matrix domain is defined as 'server_name' in configuration file.
+#
+# This is used to build the various identifiers in all the features.
+#
+# If the hostname of the public URL used to reach your Matrix services is different from your Matrix domain,
+# per example matrix.domain.tld vs domain.tld, then use the server.name configuration option.
+# See the "Configure" section of the Getting Started guide for more info.
+#
+matrix:
+  domain: '{{full_domain}}'
+
+################
+# Signing keys #
+################
+# Absolute path for the Identity Server signing keys database.
+# /!\ THIS MUST **NOT** BE YOUR HOMESERVER KEYS FILE /!\
+# If this path does not exist, it will be auto-generated.
+#
+# During testing, /var/tmp/mxisd/keys is a possible value
+# For production, recommended location shall be one of the following:
+#   - /var/lib/mxisd/keys
+#   - /var/opt/mxisd/keys
+#   - /var/local/mxisd/keys
+#
+key:
+  path: '/var/mxisd/keys'
+
+
+# Path to the SQLite DB file for mxisd internal storage
+# /!\ THIS MUST **NOT** BE YOUR HOMESERVER DATABASE /!\
+#
+# Examples:
+#  - /var/opt/mxisd/store.db
+#  - /var/local/mxisd/store.db
+#  - /var/lib/mxisd/store.db
+#
+storage:
+  provider:
+    sqlite:
+      database: '/var/mxisd/mxisd.db'
+
+
+###################
+# Identity Stores #
+###################
+# If you are using synapse standalone and do not have an Identity store,
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/synapse.md#synapse-identity-store
+#
+# If you would like to integrate with your AD/Samba/LDAP server,
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/ldap.md
+#
+# For any other Identity store, or to simply discover them,
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/stores/README.md
+
+ldap:
+  enabled: true
+  connection:
+    host: '{{ docker_host }}'
+    port: 389
+    bindDn: 'CN=mxisd-read,DC={{ dc_domain }},DC={{ dc_domain_top }}'
+    bindPassword: '{{ matrix_ldap_pass_plain }}'
+    baseDNs:
+      - 'OU=users,DC={{ dc_domain }},DC={{ dc_domain_top }}'
+  attribute:
+    uid:
+      type: 'uid'
+      value: 'uid'
+    name: 'sn'
+
+#################################################
+# Notifications for invites/addition to profile #
+#################################################
+# This is mandatory to deal with anything e-mail related.
+#
+# For an introduction to sessions, invites and 3PIDs in general,
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/threepids/session/session.md#3pid-sessions
+#
+# If you would like to change the content of the notifications,
+# see https://github.com/kamax-matrix/mxisd/blob/master/docs/threepids/notification/template-generator.md
+#
+#### E-mail connector
+#threepid:
+#  medium:
+#    email:
+#      identity:
+#        # The e-mail to send as.
+#        from: "matrix-identity@example.org"
+#
+#      connectors:
+#        smtp:
+#          # SMTP host
+#          host: "smtp.example.org"
+#
+#          # TLS mode for the connection
+#          # Possible values:
+#          #  0    Disable any kind of TLS entirely
+#          #  1    Enable STARTLS if supported by server (default)
+#          #  2    Force STARTLS and fail if not available
+#          #  3    Use full TLS/SSL instead of STARTLS
+#          #
+#          tls: 1
+#
+#          # SMTP port
+#          # Be sure to adapt depending on your TLS choice, if changed from default
+#          port: 587
+#
+#          # Login for SMTP
+#          login: "matrix-identity@example.org"
+#
+#          # Password for the account
+#          password: "ThePassword"
+
+lookup:
+  recursive:
+    allowedCidr:
+      - '{{ docker_host }}/32'

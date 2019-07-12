@@ -7,7 +7,14 @@ domain_admin_pass: changeme
 slapd_pass: test123
 gitea_ldap_pass: "{crypt}$6$LqvhBougzXSERgVP$vI.v3s33.YX78R/YFTHMTEzpdOrT6IOnhN5Zr.RSWi1RsoaDk0zY8YTqCkYPQFABWdMVqR0r6dnBCBMYtZc4R1"
 gitea_ldap_pass_plain: hejmeddig
+matrix_ldap_pass: "{crypt}$6$/4NWxzB5aaX5G9Ao$bO52m1igTtBR5edbrBcC4xS.lik68Y7kiQvZTgQUReSAdTDCza/a84oWk43VoEbueeaivGs70QCSWJ5qNzOgB."
+matrix_ldap_pass_plain: changeme
 gitea_db_pass: "hejmeddig"
+matrix_db_password: changeme
+
+synapse_macaroon_secret_key: "changeme"
+synapse_form_secret: "changeme"
+synapse_registration_secret: "changeme"
 
 # Network
 dc_domain: fricloudtest
@@ -24,6 +31,10 @@ prometheus_port: "9090"
 grafana_port: 3000
 node_export_port: "9100"
 docker_metrics_port: "9323"
+matrix_federation_port: "8448"
+matrix_synapse_port: "8008"
+matrix_metrics_port: 9003
+matrix_riot_port: 9002
 nginx_http_port: 80
 nginx_https_port: 443
 
@@ -31,6 +42,7 @@ nginx_https_port: 443
 gitea_data_path: "/root/gitea-data"
 postgresql_data_path: "/root/psql-data"
 grafana_vol_path: "/var/grafana"
+matrix_vol_path: "/var/matrix"
 nginx_sites_vol_path: "/var/nginx/sites-enabled"
 
 # Paths

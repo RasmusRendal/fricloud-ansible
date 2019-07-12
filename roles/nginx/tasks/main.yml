@@ -10,6 +10,14 @@
   template:
       src: sites/default
       dest: "{{ nginx_sites_vol_path}}"
+- name: Copy matrix site template
+  template:
+      src: sites/matrix
+      dest: "{{ nginx_sites_vol_path}}"
+- name: Copy riot site template
+  template:
+      src: sites/riot
+      dest: "{{ nginx_sites_vol_path}}"
 - name: Copy ssl cert
   copy:
       src: "{{ local_cert_path }}"
@@ -32,5 +40,6 @@
           - "/root/nginx.conf:/etc/nginx/nginx.conf:ro"
           - "{{ nginx_http_root }}:/usr/share/nginx/html:ro"
       published_ports:
-          - "{{ nginx_http_port }}:80"
           - "{{ nginx_https_port }}:443"
+          - "{{ nginx_http_port }}:80"
+          - "{{ matrix_federation_port }}:{{ matrix_federation_port }}"

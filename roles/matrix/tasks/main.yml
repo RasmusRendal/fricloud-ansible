@@ -1,0 +1,111 @@
+- name: Create database user
+  postgresql_user:
+    name: synapse
+    password: "{{ matrix_db_password }}"
+    login_host: "{{ docker_host }}"
+    login_password: "{{ postgresql_password }}"
+- name: Create ldap admin user
+  ldap_entry:
+      dn: cn=mxisd-read,dc={{dc_domain}},dc={{dc_domain_top}}
+      objectClass:
+          - simpleSecurityObject
+          - organizationalRole
+      attributes:
+          cn: mxisd-read
+          userPassword: "{{ matrix_ldap_pass }}"
+      bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+      bind_pw: "{{ domain_admin_pass }}"
+- name: Create database
+  postgresql_db:
+    name: synapse
+    encoding: UTF-8
+    owner: synapse
+    login_host: "{{ docker_host }}"
+    login_password: "{{ postgresql_password }}"
+- name: Create matrix dir
+  file:
+    path: "{{ matrix_vol_path }}"
+    state: directory
+- name: Create synapse dir
+  file:
+    path: "{{ matrix_vol_path }}/synapse"
+    state: directory
+    owner: "991"
+    group: "991"
+- name: Create synapse dir
+  file:
+    path: "{{ matrix_vol_path }}/mxisd/var"
+    state: directory
+- name: Create synapse dir
+  file:
+    path: "{{ matrix_vol_path }}/mxisd/etc"
+    state: directory
+- name: Create matrix keys
+  docker_container:
+    image: "matrixdotorg/synapse"
+    name: "matrix-synapse-gen"
+    state: started
+    auto_remove: yes
+    env:
+      SYNAPSE_CONFIG_PATH: "/data/homeserver.yaml"
+      SYNAPSE_SERVER_NAME: "{{ full_domain }}"
+      SYNAPSE_REPORT_STATS: "yes"
+    command: generate
+    volumes:
+      - "{{matrix_vol_path}}/synapse:/data"
+- name: Create matrix config
+  template:
+    src: homeserver.yaml
+    dest: "{{matrix_vol_path}}/synapse/homeserver.yaml"
+- name: Create matrix log config
+  template:
+    src: log.config
+    dest: "{{matrix_vol_path}}/synapse/log.config"
+- name: Run matrix docker
+  docker_container:
+    image: "matrixdotorg/synapse"
+    name: "matrix-synapse"
+    state: started
+    volumes:
+      - "{{matrix_vol_path}}/synapse:/data"
+    env:
+      SYNAPSE_CONFIG_PATH: "/data/homeserver.yaml"
+    published_ports:
+      - "{{ docker_host }}:{{ matrix_metrics_port }}:{{ matrix_metrics_port }}"
+      - "{{ docker_host }}:{{ matrix_synapse_port }}:8008"
+- name: Download rest auth provider
+  get_url:
+    url: https://raw.githubusercontent.com/kamax-matrix/matrix-synapse-rest-auth/master/rest_auth_provider.py
+    dest: /tmp/rest_auth_provider.py
+- name: Copy rest auth provider to container
+  command: docker cp /tmp/rest_auth_provider.py matrix-synapse:/usr/local/lib/python3.7/
+- name: Start matrix docker again
+  command: docker start matrix-synapse
+- name: Create mxisd config
+  template:
+    src: mxisd.yaml
+    dest: "{{matrix_vol_path}}/mxisd/etc/mxisd.yaml"
+- name: Run mxisd docker
+  docker_container:
+    image: "kamax/mxisd"
+    name: "mxisd"
+    state: started
+    volumes:
+      - "{{matrix_vol_path}}/mxisd/var:/var/mxisd"
+      - "{{matrix_vol_path}}/mxisd/etc:/etc/mxisd"
+    published_ports:
+      "{{ docker_host }}:8090:8090"
+
+- name: Create riot config
+  template:
+    src: riot.json
+    dest: "{{matrix_vol_path}}/riot.json"
+- name: Start riot container
+  docker_container:
+    name: "riot"
+    image: "bubuntux/riot-web"
+    state: started
+    volumes:
+      - "{{ matrix_vol_path }}/riot.json:/etc/riot-web/config.json:ro"
+    published_ports:
+      "{{ docker_host }}:{{ matrix_riot_port }}:80"
