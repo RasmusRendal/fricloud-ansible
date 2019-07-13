@@ -7,12 +7,12 @@
         become: yes
         vars:
         tags: ldap
-      - role: nginx
-        become: yes
-        tags: nginx
       - role: docker
         become: yes
         tags: docker
+      - role: nginx
+        become: yes
+        tags: nginx
       - role: postgresql
         become: yes
         tags: database

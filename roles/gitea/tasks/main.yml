@@ -61,7 +61,7 @@
       login_host: "{{ docker_host }}"
       login_user: gitea
       login_password: "{{ gitea_db_pass }}"
-      query: SELECT id FROM login_source WHERE name = '{{ dc_domain }}-ldap'
+      query: SELECT id FROM login_source WHERE name = '{{ dc_domain }}'
   register: login_source_exists
 
 - debug:
