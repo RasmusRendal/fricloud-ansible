@@ -25,8 +25,14 @@
           - python-psycopg2
       state: present
       update_cache: true
+- name: Install postgresql client tools
+  apt:
+      pkg:
+          - postgresql-client
+      state: present
+      update_cache: true
 - name: Wait for postgresql to be up
-  shell: "/usr/bin/pg_isready -h localhost -p {{ postgresql_port }}"
+  shell: "/usr/bin/pg_isready -h {{ docker_host }} -p {{ postgresql_port }}"
   register: result
   retries: 20
   delay: 3
