@@ -27,7 +27,6 @@
       path: /root/gitea-data
       state: directory
 
-
 - name: Run gitea docker
   docker_container:
       name: "gitea-docker"
@@ -47,13 +46,67 @@
           DB_PASSWD: "{{ gitea_db_pass }}"
           SSH_DOMAIN: "{{ gitea_ssh_domain }}"
           SSH_PORT: "{{ gitea_ssh_port }}"
-          ROOT_URL: "{{ gitea_http_url }}"
+          ROOT_URL: "{{ gitea_domain }}"
           APP_NAME: "Fricloud gitea"
       volumes:
           - "{{ gitea_data_path }}:/data:rw"
+          
+- name: Wait for gitea to be up
+  shell: "/usr/bin/curl http://localhost:{{ gitea_http_port }}/install"
+  register: result
+  retries: 20
+  delay: 3
+  until: result.rc == 0
+          
+- name: Get csrf cookies
+  uri:
+    url: "http://localhost:{{ gitea_http_port }}/install"
+    method: GET
+    return_content: yes
+  register: cookies
 
-- pause:
-    prompt: "Goto {{ gitea_http_url }} and install. Then continue"
+- name: Install gitea
+  uri:
+    url: "http://localhost:{{ gitea_http_port }}/install"
+    method: POST
+    body:
+      db_type: "PostgreSQL"
+      db_host: "{{ docker_host}}:{{ postgresql_port}}"
+      db_user: gitea
+      db_passwd: "{{ gitea_db_pass }}"
+      db_name: gitea_db
+      ssl_mode: disable
+      charset: utf8
+      db_path: ""
+      app_name: "{{ gitea_app_name }}"
+      repo_root_path: /data/git/repositories
+      lfs_root_path: /data/git/lfs
+      run_user: git
+      domain: localhost
+      ssh_port: "{{ gitea_ssh_port }}"
+      http_port: "{{ gitea_http_port }}"
+      app_url: "{{ gitea_domain }}"
+      log_root_path: /data/gitea/log
+      smtp_host: ""
+      smtp_from: ""
+      smtp_user: ""
+      smtp_passwd: ""
+      enable_federated_avatar: on
+      enable_open_id_sign_in: on
+      enable_open_id_sign_up: on
+      default_allow_create_organization: on
+      default_enable_timetracking: on
+      no_reply_address: "noreply@{{ full_domain }}"
+      admin_name: "{{ gitea_admin_name }}"
+      admin_passwd: "{{ gitea_admin_password }}"
+      admin_confirm_passwd: "{{ gitea_admin_password }}"
+      admin_email: "{{ gitea_admin_name }}@{{ full_domain }}"
+    body_format: form-urlencoded
+    follow_redirects: yes
+    return_content: yes
+    headers:
+      Cookie: "{{ cookies.set_cookie }}"
+  ignore_errors: yes
 
 - name: Check if login-source exists
   postgresql_query:

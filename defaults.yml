@@ -10,6 +10,8 @@ gitea_ldap_pass_plain: hejmeddig
 matrix_ldap_pass: "{crypt}$6$/4NWxzB5aaX5G9Ao$bO52m1igTtBR5edbrBcC4xS.lik68Y7kiQvZTgQUReSAdTDCza/a84oWk43VoEbueeaivGs70QCSWJ5qNzOgB."
 matrix_ldap_pass_plain: changeme
 gitea_db_pass: "hejmeddig"
+gitea_admin_name: "gitea_admin"
+gitea_admin_password: "changeme"
 matrix_db_password: changeme
 
 synapse_macaroon_secret_key: "changeme"
@@ -21,8 +23,8 @@ dc_domain: fricloudtest
 dc_domain_top: dk
 full_domain: "{{dc_domain}}.{{dc_domain_top}}"
 docker_host: 172.17.0.1
+gitea_domain: "https://gitea.{{ full_domain }}"
 gitea_ssh_domain: "git.{{ full_domain }}"
-gitea_http_url: "http://192.168.122.5:8000"
 gitea_ssh_port: "222"
 gitea_http_port: "8000"
 postgresql_port: 5432
@@ -51,3 +53,6 @@ local_cert_key_path: "roles/nginx/files/privkey.pem"
 nginx_cert: "/etc/ssl/certs/server.crt"
 nginx_cert_key: "/etc/ssl/private/server.key"
 nginx_http_root: "/var/www/html"
+
+# Etc
+gitea_app_name: "FriCloud+Gitea"

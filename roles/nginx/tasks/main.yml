@@ -18,6 +18,10 @@
   template:
       src: sites/riot
       dest: "{{ nginx_sites_vol_path}}"
+- name: Copy gitea site template
+  template:
+      src: sites/gitea
+      dest: "{{ nginx_sites_vol_path}}"
 - name: Copy ssl cert
   copy:
       src: "{{ local_cert_path }}"
