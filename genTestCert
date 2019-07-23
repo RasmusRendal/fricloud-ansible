@@ -5,10 +5,10 @@ domain="$dc_domain.$dc_domain_top"
 cert_loc="/usr/share/pki/ca-trust-source/anchors/fricloudtest.crt"
 echo $domain
 
-openssl req -x509 -nodes -subj "/CN=$domain" -keyout roles/nginx/files/privkey.pem -out roles/nginx/files/cert.crt
+openssl req -x509 -nodes -subj "/CN=$domain" -keyout roles/certs/files/privkey.pem -out roles/certs/files/cert.crt
 
 echo "# fricloud test script" | sudo tee $cert_loc
-cat roles/nginx/files/cert.crt | sudo tee $cert_loc
+cat roles/certs/files/cert.crt | sudo tee $cert_loc
 sudo update-ca-trust
 
 echo "Please enter server ip for dns record"

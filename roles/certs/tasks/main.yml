@@ -1,0 +1,12 @@
+- name: Create certs folder
+  file:
+    path: "{{ certs_dir }}"
+    state: directory
+- name: Copy ssl cert
+  copy:
+    src: "{{ local_cert_path }}"
+    dest: "{{ cert_path }}"
+- name: Copy ssl key
+  copy:
+    src: "{{ local_cert_key_path }}"
+    dest: "{{ cert_key_path }}"
