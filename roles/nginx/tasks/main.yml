@@ -22,14 +22,6 @@
   template:
       src: sites/gitea
       dest: "{{ nginx_sites_vol_path}}"
-- name: Copy ssl cert
-  copy:
-      src: "{{ local_cert_path }}"
-      dest: "{{ nginx_cert }}"
-- name: Copy ssl key
-  copy:
-      src: "{{ local_cert_key_path }}"
-      dest: "{{ nginx_cert_key }}"
 - name: Start nginx docker
   docker_container:
       name: "nginx-docker"
@@ -39,8 +31,8 @@
       restart_policy: "unless-stopped"
       volumes:
           - "{{ nginx_sites_vol_path }}:/etc/nginx/sites-enabled:ro"
-          - "{{ nginx_cert_key }}:{{ nginx_cert_key }}:ro"
-          - "{{ nginx_cert }}:{{ nginx_cert }}:ro"
+          - "{{ cert_key_path }}:{{ nginx_cert_key }}:ro"
+          - "{{ cert_path }}:{{ nginx_cert }}:ro"
           - "/root/nginx.conf:/etc/nginx/nginx.conf:ro"
           - "{{ nginx_http_root }}:/usr/share/nginx/html:ro"
       published_ports:

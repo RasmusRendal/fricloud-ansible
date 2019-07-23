@@ -48,10 +48,13 @@ matrix_vol_path: "/var/matrix"
 nginx_sites_vol_path: "/var/nginx/sites-enabled"
 
 # Paths
-local_cert_path: "roles/nginx/files/cert.crt"
-local_cert_key_path: "roles/nginx/files/privkey.pem"
+local_cert_path: "roles/certs/files/cert.crt"
+local_cert_key_path: "roles/certs/files/privkey.pem"
 nginx_cert: "/etc/ssl/certs/server.crt"
 nginx_cert_key: "/etc/ssl/private/server.key"
+certs_dir: "/var/certs/"
+cert_path: "{{ certs_dir }}server.crt"
+cert_key_path: "{{ certs_dir }}server.key"
 nginx_http_root: "/var/www/html"
 
 # Etc

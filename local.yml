@@ -3,9 +3,11 @@
   vars_files:
     defaults.yml
   roles:
+      - role: certs
+        become: yes
+        tags: certs
       - role: ldap
         become: yes
-        vars:
         tags: ldap
       - role: docker
         become: yes
