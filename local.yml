@@ -1,7 +1,6 @@
----
 - hosts: fricloudtest
   vars_files:
-    defaults.yml
+    - defaults.yml
   roles:
       - role: certs
         become: yes

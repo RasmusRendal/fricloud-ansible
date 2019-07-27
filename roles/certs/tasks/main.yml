@@ -2,11 +2,32 @@
   file:
     path: "{{ certs_dir }}"
     state: directory
+
+# Ensure compatiblity with file not neccesarily being present on controller
 - name: Copy ssl cert
   copy:
     src: "{{ local_cert_path }}"
     dest: "{{ cert_path }}"
+  ignore_errors: yes # Errors will occur if file not present on controller, they will be caught later anyway (either by check or nginx)
 - name: Copy ssl key
   copy:
     src: "{{ local_cert_key_path }}"
     dest: "{{ cert_key_path }}"
+  ignore_errors: yes
+
+- name: Copy ssl cert when not present on controller
+  command: cp {{ local_cert_path }} {{ cert_path }}
+  ignore_errors: yes
+- name: Copy ssl key
+  command: cp {{ local_cert_key_path }} {{ cert_key_path }}
+  ignore_errors: yes
+  
+- name: Check that cert exists
+  file:
+    path: "{{ cert_path }}"
+    state: file
+
+- name: Check that cert key exists
+  file:
+    path: "{{ cert_key_path }}"
+    state: file    
