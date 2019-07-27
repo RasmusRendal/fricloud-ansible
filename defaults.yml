@@ -19,8 +19,8 @@ synapse_form_secret: "changeme"
 synapse_registration_secret: "changeme"
 
 # Network
-dc_domain: fricloudtest
-dc_domain_top: dk
+dc_domain: fricloud
+dc_domain_top: local
 full_domain: "{{dc_domain}}.{{dc_domain_top}}"
 docker_host: 172.17.0.1
 gitea_domain: "https://gitea.{{ full_domain }}"

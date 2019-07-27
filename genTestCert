@@ -1,16 +1,29 @@
 #!/bin/bash
+read -p "This script only works on fedora-like systems, are you sure you want to run it [Y/n]?"
+if [[ $REPLY =~ [Nn] ]]
+then
+    exit 1
+fi
+
 dc_domain=$(grep -Po "dc_domain: \K.*" defaults.yml)
 dc_domain_top=$(grep -Po "dc_domain_top: \K.*" defaults.yml)
 domain="$dc_domain.$dc_domain_top"
 cert_loc="/usr/share/pki/ca-trust-source/anchors/fricloudtest.crt"
 echo $domain
 
-openssl req -x509 -nodes -subj "/CN=$domain" -keyout roles/certs/files/privkey.pem -out roles/certs/files/cert.crt
+read -p "Do you wish to have a randomly (openssl) generated certificate placed in $cert_loc and made trusted [Y/n]?"
+if [[ $REPLY =~ [Yy] ]] || [ -z "$REPLY" ]
+then
+    openssl req -x509 -nodes -subj "/CN=$domain" -keyout roles/certs/files/privkey.pem -out roles/certs/files/cert.crt
+    echo "# fricloud test script" | sudo tee $cert_loc
+    cat roles/certs/files/cert.crt | sudo tee $cert_loc
+    sudo update-ca-trust
+fi
 
-echo "# fricloud test script" | sudo tee $cert_loc
-cat roles/certs/files/cert.crt | sudo tee $cert_loc
-sudo update-ca-trust
-
-echo "Please enter server ip for dns record"
-read serverip
-echo "$serverip $domain" | sudo tee -a /etc/hosts
+read -p "Do you wish to have an entry added to /etc/hosts [Y/n]?"
+if [[ $REPLY =~ [Yy] ]] || [ -z "$REPLY" ]
+then
+    echo "Please enter server ip for dns record"
+    read serverip
+    echo "$serverip $domain" | sudo tee -a /etc/hosts
+fi
