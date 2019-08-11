@@ -1,0 +1,80 @@
+- name: Create ldap email user
+  ldap_entry:
+    dn: cn=email-read,dc={{ dc_domain }},dc={{ dc_domain_top }}
+    objectClass:
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      cn: email-read
+      userPassword: "{{ email_ldap_password }}"
+    bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    bind_pw: "{{ domain_admin_pass }}"
+- name: Stop exim4 # It takes up the 25 port. So if it's there, let's kill it
+  systemd:
+    enabled: false
+    state: stopped
+    name: exim4
+  ignore_errors: yes
+
+- name: Copy email git
+  copy:
+    src: "files/docker-mailserver"
+    dest: "/tmp/"
+- name: Build email container
+  docker_image:
+    build:
+      path: "/tmp/docker-mailserver"
+      pull: yes
+    name: "mailserver"
+    source: build
+- name: Run email container
+  docker_container:
+    name: "email"
+    image: "mailserver"
+    state: started
+    restart: yes
+    domainname: "{{ full_domain }}"
+    published_ports:
+      - "25:25"
+      - "143:143"
+      - "587:587"
+      - "993:993"
+    volumes:
+      - "{{ email_vol_path }}/data:/var/mail"
+      - "{{ email_vol_path }}/state:/var/mail-state"
+      - "{{ email_vol_path }}/config:/tmp/docker-mailserver"
+      - "{{ cert_path }}:/tmp/server.crt:ro"
+      - "{{ cert_key_path }}:/tmp/server.key:ro"
+    env:
+      ENABLE_SPAMASSASSIN: "0"
+      ENABLE_CLAMAV: "0"
+      ENABLE_FAIL2BAN: "1"
+      ENABLE_POSTGREY: "0"
+      SSL_TYPE: "manual"
+      SSL_CERT_PATH: "/tmp/server.crt"
+      SSL_KEY_PATH: "/tmp/server.key"
+      SPOOF_PROTECTION: "1"
+      ONE_DIR: "1"
+      DMS_DEBUG: "0"
+      ENABLE_LDAP: "1"
+      LDAP_SERVER_HOST: "{{ docker_host }}"
+      LDAP_SEARCH_BASE: "ou=users,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+      LDAP_BIND_DN: "cn=email-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+      LDAP_BIND_PW: "{{ email_ldap_password }}"
+      LDAP_QUERY_FILTER_USER: "(&(objectClass=person)(uid=%u))"
+      LDAP_QUERY_FILTER_GROUP: (mailGroupMember=%u)
+      LDAP_QUERY_FILTER_ALIAS: (|(&(mailAlias=%s)(objectClass=PostfixBookMailForward))(&(mailAlias=%s)(objectClass=PostfixBookMailAccount)(mailEnabled=TRUE)))
+      LDAP_QUERY_FILTER_DOMAIN: (|(&(mail=*@%s)(objectClass=PostfixBookMailAccount)(mailEnabled=TRUE))(&(mailGroupMember=*@%s)(objectClass=PostfixBookMailAccount)(mailEnabled=TRUE))(&(mailalias=*@%s)(objectClass=PostfixBookMailForward)))
+      DOVECOT_PASS_FILTER: (&(objectClass=person)(uid=%n))
+      DOVECOT_USER_FILTER: (&(objectClass=person)(uid=%n))
+      DOVECOT_PASS_ATTR: "uid=user,userPassword=password"
+      ENABLE_SASLAUTHD: "0"
+      SASLAUTHD_MECHANISMS: ldap
+      SASLAUTHD_LDAP_SERVER: "{{ docker_host }}"
+      SASLAUTHD_LDAP_SSL: "0"
+      SASLAUTHD_LDAP_BIND_DN: "cn=email-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+      SASLAUTHD_LDAP_PASSWORD: "{{ email_ldap_password }}"
+      SASLAUTHD_LDAP_SEARCH_BASE: "ou=users,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+      SASLAUTHD_LDAP_FILTER: "(&(uid=%U)(objectClass=person))"
+      POSTMASTER_ADDRESS: "postmaster@{{ full_domain }}"
+      POSTFIX_MESSAGE_SIZE_LIMIT: "100000000"
