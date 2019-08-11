@@ -10,6 +10,7 @@ gitea_ldap_pass_plain: hejmeddig
 matrix_ldap_pass: "{crypt}$6$/4NWxzB5aaX5G9Ao$bO52m1igTtBR5edbrBcC4xS.lik68Y7kiQvZTgQUReSAdTDCza/a84oWk43VoEbueeaivGs70QCSWJ5qNzOgB."
 matrix_ldap_pass_plain: changeme
 gitea_db_pass: "hejmeddig"
+email_ldap_password: "changeme"
 gitea_admin_name: "gitea_admin"
 gitea_admin_password: "changeme"
 matrix_db_password: changeme
@@ -46,6 +47,7 @@ postgresql_data_path: "/root/psql-data"
 grafana_vol_path: "/var/grafana"
 matrix_vol_path: "/var/matrix"
 nginx_sites_vol_path: "/var/nginx/sites-enabled"
+email_vol_path: "/var/mail"
 
 # Paths
 local_cert_path: "roles/certs/files/cert.crt"

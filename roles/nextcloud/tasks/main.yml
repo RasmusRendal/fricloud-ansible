@@ -43,10 +43,9 @@
 - name: Wait for nextcloud docker to start
   wait_for:
     port: "{{nextcloud_port}}"
-    delay: 1
+    delay: 5
 - name: Install nextcloud
   shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ nextcloud_admin_password }}"
-  ignore_errors: yes
 - name: Get RMS book
   get_url:
     url: https://www.gnu.org/philosophy/fsfs/rms-essays.pdf
