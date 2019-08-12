@@ -1,3 +1,7 @@
+[submodule "roles/website/files/frontpage"]
+	path = roles/website/files/frontpage
+	url = ssh://git@gitlab.fricloud.dk:9003/fricloud-dev/frontpage.git
+
 [submodule "roles/email/files/docker-mailserver"]
 	path = roles/email/files/docker-mailserver
 	url = ssh://git@gitlab.fricloud.dk:9003/fricloud-dev/docker-mailserver.git

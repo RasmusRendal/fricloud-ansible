@@ -4,6 +4,7 @@
 Make sure vagrant is running with libvirt backend (see vagrant docs), then:
 
 - Make sure `hosts` in `local.yml` is set to `fricloudtest`
+- Get submodules `$ git submodule update --init --recursive`
 
 and
 

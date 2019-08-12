@@ -11,6 +11,9 @@
       - role: docker
         become: yes
         tags: docker
+      - role: website
+        become: yes
+        tags: website
       - role: nginx
         become: yes
         tags: nginx
