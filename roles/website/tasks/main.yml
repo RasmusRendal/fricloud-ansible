@@ -1,0 +1,21 @@
+- name: Copy website git
+  copy:
+    src: "files/frontpage"
+    dest: "/tmp/"
+- name: Create build directory
+  file: path=/tmp/frontpage state=directory
+- name: Build docker image
+  docker_image:
+    build:
+      path: "/tmp/frontpage"
+      pull: yes
+    name: "website"
+    source: build
+- name: Run website container
+  docker_container:
+    name: "website"
+    image: "website"
+    state: started
+    restart: yes
+    published_ports:
+      - "{{ docker_host}}:{{ website_port }}:80"
