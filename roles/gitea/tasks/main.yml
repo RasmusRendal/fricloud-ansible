@@ -50,14 +50,14 @@
           APP_NAME: "Fricloud gitea"
       volumes:
           - "{{ gitea_data_path }}:/data:rw"
-          
+
 - name: Wait for gitea to be up
   shell: "/usr/bin/curl http://localhost:{{ gitea_http_port }}/install"
   register: result
   retries: 20
   delay: 3
   until: result.rc == 0
-          
+
 - name: Get csrf cookies
   uri:
     url: "http://localhost:{{ gitea_http_port }}/install"
@@ -83,8 +83,8 @@
       lfs_root_path: /data/git/lfs
       run_user: git
       domain: localhost
-      ssh_port: "{{ gitea_ssh_port }}"
-      http_port: "{{ gitea_http_port }}"
+      ssh_port: "22"
+      http_port: "3000"
       app_url: "{{ gitea_domain }}"
       log_root_path: /data/gitea/log
       smtp_host: ""

@@ -1,0 +1,60 @@
+# To run this set of tasks, a file named backup.zip is expected in files. The zip is to be unencrypted, and contain this structure
+# backup/
+#   ldap_backup.ldif
+#   synapsedb.dump
+#   git/ (Folder full of git repos)
+#   nextcloud/
+
+# Search for all persons, pipe it into grep to extract dn's, and pipe that into ldapdelete
+- name: Delete ldap users
+  shell: |
+    ldapsearch -D "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}" -x -w {{ domain_admin_pass }} -H ldap:/// objectClass=person | grep -Po 'dn: \K.*' | ldapdelete -D "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}" -x -w {{ domain_admin_pass }} -H ldap:///
+- name: Ensure unzip is installed
+  apt:
+    name: unzip
+    state: present
+- name: Extract backup zip
+  unarchive:
+    src: backup.zip
+    dest: /tmp/
+- name: Replace ldap domains in backup
+  command: "sed -i -e 's/dc={{ dc_domain_old }},dc={{ dc_domain_top_old }}/dc={{ dc_domain }},dc={{ dc_domain_top }}/g' /tmp/backup/ldap_backup.ldif"
+- name: Remove unneeded internal attributes in ldap backup
+  command: "sed -i -E -e '/^(structuralObjectClass|entryUUID|creatorsName|createTimestamp|entryCSN|modifiersName|modifyTimestamp)/ d' /tmp/backup/ldap_backup.ldif"
+- name: Add ldap users from backup
+  command: "ldapadd -f /tmp/backup/ldap_backup.ldif -D \"cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}\" -w {{ domain_admin_pass }} -H ldap:///"
+
+  # Doesn't work
+  #- name: Stop gitea container
+  #  docker_container:
+  #    name: gitea-docker
+  #    state: stopped
+  #- name: Add git repositories
+  #  shell: "rsync -r /tmp/backup/git/* /root/gitea-data/git/repositories/"
+  #- name: Set permissions
+  #  shell: "chown 1000:1000 /root/gitea-data/git/repositories/ -R"
+  #- name: Restart gitea container
+  #  docker_container:
+  #    name: gitea-docker
+  #    state: started
+
+- name: Stop matrix synapse
+  docker_container:
+    name: matrix-synapse
+    state: stopped
+
+- name: Empty synapse database
+  shell: "docker exec -iu postgres psql-database psql synapse -c \"DROP SCHEMA public CASCADE; CREATE SCHEMA public;\""
+- name: Restore default sql grants
+  shell: "docker exec -iu postgres psql-database psql synapse -c \"GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO public;\""
+- name: Replace with old database
+  shell: "docker exec -iu postgres psql-database psql synapse < /tmp/backup/synapsedb.dump"
+- name: Set database owner
+  shell: "docker exec -iu postgres psql-database psql -c \"ALTER DATABASE synapse OWNER TO synapse;\""
+- name: Grant privileges
+  shell: "docker exec -iu postgres psql-database psql synapse -c \"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO synapse;\""
+- name: Start matrix synapse
+  docker_container:
+    name: matrix-synapse
+    state: started
+

@@ -20,8 +20,8 @@ synapse_form_secret: "changeme"
 synapse_registration_secret: "changeme"
 
 # Network
-dc_domain: fricloud
-dc_domain_top: local
+dc_domain: fricloudtest
+dc_domain_top: dk
 full_domain: "{{dc_domain}}.{{dc_domain_top}}"
 docker_host: 172.17.0.1
 gitea_domain: "https://gitea.{{ full_domain }}"
@@ -62,3 +62,7 @@ nginx_http_root: "/var/www/html"
 
 # Etc
 gitea_app_name: "FriCloud+Gitea"
+
+# Backup
+dc_domain_old: fricloud
+dc_domain_top_old: dk
