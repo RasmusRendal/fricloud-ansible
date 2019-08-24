@@ -8,27 +8,14 @@
     state: present
     update_cache: true
 
-- name: Add Docker PGP key
-  apt_key: url=https://download.docker.com/linux/ubuntu/gpg
-
-- name: Add docker APT repo
-  apt_repository:
-      repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ansible_distribution_release}} stable
-
-- name: Install docker
+- name: Install docker and python wrappers
   apt:
-      pkg: docker-ce
-      state: present
-      update_cache: true
-
-- name: Install python pip
-  apt:
-      pkg: python-pip
-      state: present
-      update_cache: true
-
-- name: Install docker lib for python
-  command: pip install docker
+    pkg:
+        - docker.io
+        - python-docker
+        - python3-docker
+    state: present
+    update_cache: true
 
 - name: Add daemon config
   template:

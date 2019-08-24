@@ -8,12 +8,12 @@ Vagrant.configure("2") do |config|
 	config.vm.hostname = "fricloudtest"
     
     # Use Debian Stretch, go here for version change: https://app.vagrantup.com/debian
-    config.vm.box = "debian/stretch64"
+    config.vm.box = "debian/buster64"
     config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: ".git/"
 
     # Set memory
     config.vm.provider :libvirt do |v|
-        v.memory = 3072
+        v.memory = 3500
     end
     
     # Run cert generation
