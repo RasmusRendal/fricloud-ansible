@@ -6,22 +6,12 @@
   template:
       src: nginx.conf
       dest: /root/nginx.conf
-- name: Copy default site template
+- name: Send templates
   template:
-      src: sites/default
-      dest: "{{ nginx_sites_vol_path}}"
-- name: Copy matrix site template
-  template:
-      src: sites/matrix
-      dest: "{{ nginx_sites_vol_path}}"
-- name: Copy riot site template
-  template:
-      src: sites/riot
-      dest: "{{ nginx_sites_vol_path}}"
-- name: Copy gitea site template
-  template:
-      src: sites/gitea
-      dest: "{{ nginx_sites_vol_path}}"
+    src: '{{ item }}'
+    dest: '{{ nginx_sites_vol_path }}/{{ item | basename }}'
+  with_fileglob: '../templates/sites/*'
+
 - name: Start nginx docker
   docker_container:
       name: "nginx-docker"

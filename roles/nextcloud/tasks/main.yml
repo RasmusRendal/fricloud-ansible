@@ -29,7 +29,7 @@
     state: started
     restart: yes
     published_ports:
-      "127.0.0.1:{{ nextcloud_port }}:80"
+      "{{ docker_host }}:{{ nextcloud_port }}:80"
     volumes:
       - /var/nextcloud:/var/www/html
     env:
@@ -42,10 +42,17 @@
 # The environment variables do not work, so a command is necessary. Luckily, it does only set the admin password if docker is not yet initialized
 - name: Wait for nextcloud docker to start
   wait_for:
+    host: "{{ docker_host }}"
     port: "{{nextcloud_port}}"
     delay: 5
+
+- name: Check if nextcloud is installed
+  shell: "sudo docker exec --user www-data nextcloud php occ status"
+  register: installed
+
 - name: Install nextcloud
   shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ nextcloud_admin_password }}"
+  when: '"false" in installed.stdout'
 - name: Get RMS book
   get_url:
     url: https://www.gnu.org/philosophy/fsfs/rms-essays.pdf
