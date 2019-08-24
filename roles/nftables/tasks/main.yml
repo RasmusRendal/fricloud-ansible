@@ -1,0 +1,8 @@
+- name: install nftables
+  apt: pkg=nftables state=present update_cache=true
+- name: nftables rule file
+  template:
+      src: nftables.conf
+      dest: /etc/nftables.conf
+- name: reload nftables
+  shell: nft -f /etc/nftables.conf

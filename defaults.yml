@@ -24,6 +24,7 @@ dc_domain: fricloudtest
 dc_domain_top: dk
 full_domain: "{{dc_domain}}.{{dc_domain_top}}"
 docker_host: 172.17.0.1
+docker_net: "docker0"
 gitea_domain: "https://gitea.{{ full_domain }}"
 gitea_ssh_domain: "git.{{ full_domain }}"
 gitea_ssh_port: "222"
