@@ -7,6 +7,6 @@ server {
 	ssl_certificate_key {{ nginx_cert_key }};
 
 	location / {
-		proxy_pass http://localhost:{{ gitea_http_port }};
+		proxy_pass http://{{ docker_host }}:{{ gitea_http_port }};
 	}
 }
