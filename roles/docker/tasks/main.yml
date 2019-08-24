@@ -21,9 +21,3 @@
   template:
     src: daemon.json
     dest: /etc/docker/daemon.json
-
-- name: Restart docker service
-  systemd:
-    name: docker
-    enabled: yes
-    state: restarted
