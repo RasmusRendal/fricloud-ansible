@@ -35,3 +35,8 @@
       - role: matrix
         become: yes
         tags: matrix
+      - role: restore
+        become: yes
+        tags:
+          - never
+          - restore
