@@ -1,13 +1,13 @@
 server {
 	listen [::]:443 ssl;
 	listen 443 ssl;
-	server_name gitea.{{ full_domain }};
+	server_name nextcloud.{{ full_domain }};
 
 	ssl_certificate {{ nginx_cert }};
 	ssl_certificate_key {{ nginx_cert_key }};
 
 	location / {
 		proxy_set_header Host $host;
-		proxy_pass http://{{ docker_host }}:{{ gitea_http_port }};
+		proxy_pass http://{{ docker_host }}:{{ nextcloud_port }};
 	}
 }
