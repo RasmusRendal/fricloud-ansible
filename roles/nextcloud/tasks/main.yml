@@ -1,3 +1,7 @@
+- name: Hash ldap password
+  shell: "openssl passwd -6 {{ lookup('password', '/tmp/passwords/nextcloud_ldap_password') }}"
+  register: ldap_password
+
 - name: Create ldap nextcloud user
   ldap_entry:
     dn: cn=nextcloud-read,dc={{ dc_domain }},dc={{ dc_domain_top }}
@@ -6,13 +10,13 @@
       - organizationalRole
     attributes:
       cn: nextcloud-read
-      userPassword: "{{ nextcloud_ldap_password }}"
+      userPassword: "{crypt}{{ ldap_password.stdout }}"
     bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
     bind_pw: "{{ domain_admin_pass }}"
 - name: Create database user
   postgresql_user:
     name: nextcloud
-    password: "{{ nextcloud_db_pass }}"
+    password: "{{ lookup('password', '/tmp/passwords/nextcloud_db_password') }}"
     login_host: "{{ docker_host }}"
     login_password: "{{ postgresql_password }}"
 - name: Create database
@@ -35,7 +39,7 @@
     env:
       POSTGRES_DB: nextcloud
       POSTGRES_USER: nextcloud
-      POSTGRES_PASSWORD: "{{ nextcloud_db_pass }}"
+      POSTGRES_PASSWORD: "{{ lookup('password', '/tmp/passwords/nextcloud_db_password') }}"
       POSTGRES_HOST: "{{ docker_host }}"
       #NEXTCLOUD_ADMIN_USER: "admin"
       #NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud_admin_password }}"
@@ -51,12 +55,14 @@
   register: installed
 
 - name: Install nextcloud
-  shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ nextcloud_admin_password }}"
+  shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ lookup('password', '/tmp/passwords/nextcloud_admin_password') }}"
   when: '"false" in installed.stdout'
 - name: Get RMS book
   get_url:
     url: https://www.gnu.org/philosophy/fsfs/rms-essays.pdf
     dest: /var/nextcloud/core/skeleton/
+- name: Add trusted domain
+  shell: "sudo docker exec --user www-data nextcloud php occ config:system:set trusted_domains 0 --value=nextcloud.{{ full_domain }}"
 # I did my best
 - name: Install the ldap extension
   command: docker exec --user www-data nextcloud php occ app:install user_ldap
@@ -71,7 +77,7 @@
 - name: Set ldap username
   command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapAgentName "cn=nextcloud-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
 - name: Set ldap password
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapAgentPassword "{{ nextcloud_ldap_password }}"
+  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapAgentPassword "{{ lookup('password', '/tmp/passwords/nextcloud_ldap_password') }}"
 - name: Set ldap base
   command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapBase "dc={{ dc_domain }},dc={{ dc_domain_top }}"
 - name: Set ldap base
