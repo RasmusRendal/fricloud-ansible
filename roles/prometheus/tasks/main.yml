@@ -33,7 +33,7 @@
     volumes:
       - /etc/prometheus.yml:/etc/prometheus/prometheus.yml
     published_ports:
-      "0.0.0.0:{{ prometheus_port }}:9090"
+      "{{ docker_host }}:{{ prometheus_port }}:9090"
 - name: Create grafana data directory
   file:
     path: /var/grafana/data
