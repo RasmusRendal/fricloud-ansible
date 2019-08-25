@@ -1,4 +1,5 @@
 # Passwords
+passwords_dir: /tmp/passwords/
 nextcloud_ldap_password: changeme
 nextcloud_db_pass: changeme
 nextcloud_admin_password: changeme

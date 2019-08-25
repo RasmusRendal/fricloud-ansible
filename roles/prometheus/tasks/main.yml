@@ -1,5 +1,5 @@
 - name: Hash ldap password
-  shell: "openssl passwd -6 {{ lookup('password', '/tmp/passwords/grafana_ldap_password') }}"
+  shell: "openssl passwd -6 {{ lookup('password', '{{ passwords_dir }}grafana_ldap_password') }}"
   register: ldap_password
 - name: Create ldap grafana user
   ldap_entry:
@@ -107,7 +107,7 @@
       - "{{grafana_vol_path}}/data:/var/lib/grafana"
       - "{{grafana_vol_path}}/conf:/etc/grafana"
     env:
-      GF_SECURITY_ADMIN_PASSWORD: "{{ lookup('password', '/tmp/passwords/grafana_password') }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ lookup('password', '{{ passwords_dir }}grafana_password') }}"
 - name: Install prometheus node exporter
   apt: pkg=prometheus-node-exporter state=present update_cache=true
 - name: Create service for prometheus node exporter

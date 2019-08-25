@@ -23,7 +23,7 @@ ssl_skip_verify = false
 bind_dn = "cn=grafana-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
 # Search user bind password
 # If the password contains # or ; you have to wrap it with triple quotes. Ex """#password;"""
-bind_password = '{{ lookup('password', '/tmp/passwords/grafana_ldap_password') }}'
+bind_password = '{{ lookup('password', '{{ passwords_dir }}grafana_ldap_password') }}'
 
 # User search filter, for example "(cn=%s)" or "(sAMAccountName=%s)" or "(uid=%s)"
 search_filter = "(uid=%s)"

@@ -22,4 +22,4 @@ scrape_configs:
       - targets: ['{{ docker_host }}:{{ grafana_port}}']
     basic_auth:
       username: grafana
-      password: {{ lookup('password', '/tmp/passwords/grafana_metrics_pass') }}
+      password: {{ lookup('password', '{{ passwords_dir }}grafana_metrics_pass') }}
