@@ -36,28 +36,28 @@
       "{{ docker_host }}:{{ prometheus_port }}:9090"
 - name: Create grafana data directory
   file:
-    path: /var/grafana/data
+    path: "{{ grafana_vol_path }}/data"
     state: directory
-    mode: '0755'
+    mode: '0700'
     owner: "472"
     group: "472"
 - name: Create grafana conf directory
   file:
-    path: /var/grafana/conf
+    path: "{{ grafana_vol_path }}/conf"
     state: directory
-    mode: '0755'
+    mode: '0700'
     owner: "472"
     group: "472"
 - name: Send config
   template:
     src: "{{ item }}"
-    dest: "/var/grafana/conf/{{ item | basename }}"
+    dest: "{{ grafana_vol_path }}/conf/{{ item | basename }}"
   with_fileglob: "../templates/conf/*"
 - name: Create dashboards directory
   file:
-    path: /var/grafana/data/dashboards
+    path: "{{ grafana_vol_path }}/data/dashboards"
     state: directory
-    mode: '0755'
+    mode: '0700'
     owner: "472"
     group: "472"
 - name: Copy dashboards
@@ -67,33 +67,33 @@
   with_fileglob: "../templates/dashboards/*"
 - name: Create provisioning directory
   file:
-    path: /var/grafana/conf/provisioning
+    path: "{{ grafana_vol_path }}/conf/provisioning"
     state: directory
-    mode: '0755'
+    mode: '0700'
     owner: "472"
     group: "472"
 - name: Create datasources directory
   file:
-    path: /var/grafana/conf/provisioning/datasources
+    path: "{{ grafana_vol_path }}/conf/provisioning/datasources"
     state: directory
-    mode: '0755'
+    mode: '0700'
     owner: "472"
     group: "472"
 - name: Send config
   template:
     src: "conf/provisioning/datasources/prometheus.yaml"
-    dest: "/var/grafana/conf/provisioning/datasources/prometheus.yaml"
+    dest: "{{ grafana_vol_path }}/conf/provisioning/datasources/prometheus.yaml"
 - name: Create dashboards directory
   file:
-    path: /var/grafana/conf/provisioning/dashboards
+    path: "{{ grafana_vol_path }}/conf/provisioning/dashboards"
     state: directory
-    mode: '0755'
+    mode: '0700'
     owner: "472"
     group: "472"
 - name: Send config
   template:
     src: "conf/provisioning/dashboards/dashboards.yaml"
-    dest: "/var/grafana/conf/provisioning/dashboards/dashboards.yaml"
+    dest: "{{ grafana_vol_path }}/conf/provisioning/dashboards/dashboards.yaml"
 
 - name: Create grafana docker
   docker_container:
