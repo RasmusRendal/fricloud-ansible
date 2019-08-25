@@ -5,14 +5,10 @@ nextcloud_admin_password: changeme
 postgresql_password: changeme
 domain_admin_pass: changeme
 slapd_pass: test123
-gitea_ldap_pass: "{crypt}$6$LqvhBougzXSERgVP$vI.v3s33.YX78R/YFTHMTEzpdOrT6IOnhN5Zr.RSWi1RsoaDk0zY8YTqCkYPQFABWdMVqR0r6dnBCBMYtZc4R1"
-gitea_ldap_pass_plain: hejmeddig
 matrix_ldap_pass: "{crypt}$6$/4NWxzB5aaX5G9Ao$bO52m1igTtBR5edbrBcC4xS.lik68Y7kiQvZTgQUReSAdTDCza/a84oWk43VoEbueeaivGs70QCSWJ5qNzOgB."
 matrix_ldap_pass_plain: changeme
-gitea_db_pass: "hejmeddig"
 email_ldap_password: "changeme"
 gitea_admin_name: "gitea_admin"
-gitea_admin_password: "changeme"
 matrix_db_password: changeme
 
 synapse_macaroon_secret_key: "changeme"
@@ -62,7 +58,7 @@ cert_key_path: "{{ certs_dir }}server.key"
 nginx_http_root: "/var/www/html"
 
 # Etc
-gitea_app_name: "FriCloud+Gitea"
+gitea_app_name: "FriCloud Gitea"
 
 # Backup
 dc_domain_old: fricloud
