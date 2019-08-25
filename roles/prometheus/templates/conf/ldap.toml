@@ -29,7 +29,7 @@ bind_password = '{{ lookup('password', '{{ passwords_dir }}grafana_ldap_password
 search_filter = "(uid=%s)"
 
 # An array of base dns to search through
-search_base_dns = ["dc={{ dc_domain }},dc={{ dc_domain_top }}"]
+search_base_dns = ["ou=users,dc={{ dc_domain }},dc={{ dc_domain_top }}"]
 
 ## For Posix or LDAP setups that does not support member_of attribute you can define the below settings
 ## Please check grafana LDAP docs for examples
