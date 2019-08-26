@@ -1,5 +1,5 @@
 - name: Hash ldap password
-  shell: "openssl passwd -6 {{ lookup('password', '/tmp/passwords/gitea_ldap_pass') }}"
+  shell: "openssl passwd -6 {{ lookup('password', '{{ passwords_dir }}gitea_ldap_pass') }}"
   register: ldap_password
 
 - name: Create ldap admin user
@@ -13,10 +13,19 @@
           userPassword: "{crypt}{{ ldap_password.stdout }}"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
       bind_pw: "{{ domain_admin_pass }}"
+- name: Ensure ldap password is correct
+  ldap_attr:
+    dn: "cn=gitea-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    name: userPassword
+    values: "{crypt}{{ ldap_password.stdout }}"
+    state: exact
+    bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    bind_pw: "{{ domain_admin_pass }}"
+
 - name: Create db user
   postgresql_user:
       name: gitea
-      password: "{{ lookup('password', '/tmp/passwords/gitea_db_pass') }}"
+      password: "{{ lookup('password', '{{ passwords_dir }}gitea_db_pass') }}"
       login_host: "{{ docker_host }}"
       login_password: "{{ postgresql_password }}"
 - name: Create db
@@ -28,8 +37,17 @@
       login_password: "{{ postgresql_password }}"
 - name: Create data dir
   file:
-      path: /root/gitea-data
+      path: "{{ gitea_data_path }}"
       state: directory
+
+- name: Create conf dir
+  file:
+    path: /root/gitea-data/gitea/conf
+    state: directory
+- name: Send template
+  template:
+    src: "app.ini"
+    dest: "{{ gitea_data_path }}/gitea/conf/app.ini"
 
 - name: Run gitea docker
   docker_container:
@@ -38,7 +56,7 @@
       state: started
       restart_policy: "unless-stopped"
       published_ports:
-          - "{{ gitea_http_port }}:3000"
+          - "{{ docker_host }}:{{ gitea_http_port }}:3000"
           - "{{ gitea_ssh_port }}:22"
       env:
           USER_UID: "1000"
@@ -47,7 +65,7 @@
           DB_HOST: "{{ docker_host }}:5432"
           DB_NAME: "gitea_db"
           DB_USER: "gitea"
-          DB_PASSWD: "{{ lookup('password', '/tmp/passwords/gitea_db_pass') }}"
+          DB_PASSWD: "{{ lookup('password', '{{ passwords_dir }}gitea_db_pass') }}"
           SSH_DOMAIN: "{{ gitea_ssh_domain }}"
           SSH_PORT: "22"
           ROOT_URL: "{{ gitea_domain }}"
@@ -56,7 +74,7 @@
           - "{{ gitea_data_path }}:/data:rw"
 
 - name: Wait for gitea to be up
-  shell: "/usr/bin/curl http://localhost:{{ gitea_http_port }}/install"
+  shell: "/usr/bin/curl http://{{ docker_host }}:{{ gitea_http_port }}/install"
   register: result
   retries: 20
   delay: 3
@@ -87,7 +105,7 @@
       db_type: "PostgreSQL"
       db_host: "{{ docker_host}}:{{ postgresql_port}}"
       db_user: gitea
-      db_passwd: "{{ lookup('password', '/tmp/passwords/gitea_db_pass') }}"
+      db_passwd: "{{ lookup('password', '{{ passwords_dir }}gitea_db_pass') }}"
       db_name: gitea_db
       ssl_mode: disable
       charset: utf8
@@ -112,8 +130,8 @@
       default_enable_timetracking: on
       no_reply_address: "noreply@{{ full_domain }}"
       admin_name: "{{ gitea_admin_name }}"
-      admin_passwd: "{{ lookup('password', '/tmp/passwords/gitea_admin_password') }}"
-      admin_confirm_passwd: "{{ lookup('password', '/tmp/passwords/gitea_admin_password') }}"
+      admin_passwd: "{{ lookup('password', '{{ passwords_dir }}gitea_admin_password') }}"
+      admin_confirm_passwd: "{{ lookup('password', '{{ passwords_dir }}gitea_admin_password') }}"
       admin_email: "{{ gitea_admin_name }}@{{ full_domain }}"
     body_format: form-urlencoded
     follow_redirects: yes
@@ -128,7 +146,7 @@
       db: gitea_db
       login_host: "{{ docker_host }}"
       login_user: gitea
-      login_password: "{{ lookup('password', '/tmp/passwords/gitea_db_pass') }}"
+      login_password: "{{ lookup('password', '{{ passwords_dir }}gitea_db_pass') }}"
       query: SELECT id FROM login_source WHERE name = '{{ dc_domain }}'
   register: login_source_exists
 
@@ -141,7 +159,7 @@
       db: gitea_db
       login_host: "{{ docker_host }}"
       login_user: gitea
-      login_password: "{{ lookup('password', '/tmp/passwords/gitea_db_pass') }}"
+      login_password: "{{ lookup('password', '{{ passwords_dir }}gitea_db_pass') }}"
       query: >-
           INSERT INTO login_source ( type, name, is_actived, is_sync_enabled, created_unix, updated_unix, cfg) VALUES
           (2, '{{ dc_domain }}', True, True, 0, 0,
@@ -151,7 +169,7 @@
               "SecurityProtocol":0,
               "SkipVerify":false,
               "BindDN":"cn=gitea-read,dc={{dc_domain}},dc={{dc_domain_top}}",
-              "BindPassword":"{{ lookup("password", "/tmp/passwords/gitea_ldap_pass") }}",
+              "BindPassword":"{{ lookup("password", "{{ passwords_dir }}gitea_ldap_pass") }}",
               "UserBase":"ou=users,dc={{dc_domain}},dc={{dc_domain_top}}",
               "UserDN":"",
               "AttributeUsername":"uid",
@@ -165,38 +183,30 @@
               "AdminFilter":"(memberof=cn=admin,ou=groups,dc={{dc_domain}},dc={{dc_domain_top}})",
               "Enabled":true}')
 
-- name: Turn off gitea container
-  docker_container:
-    name: gitea-docker
-    state: stopped
-
-- name: Change ssh domain
-  replace:
-    path: /root/gitea-data/gitea/conf/app.ini
-    regexp: "(SSH_DOMAIN *= )[a-zA-Z0-9.-]*$"
-    replace: '\g<1>{{ full_domain }}'
-- name: Change ssh port
-  replace:
-    path: /root/gitea-data/gitea/conf/app.ini
-    regexp: "(SSH_PORT *= )[a-zA-Z0-9.-]*$"
-    replace: '\g<1>{{ gitea_ssh_port }}'
-- name: Change internal port
-  replace:
-    path: /root/gitea-data/gitea/conf/app.ini
-    regexp: "(SSH_LISTEN_PORT *= )[a-zA-Z0-9.-]*$"
-    replace: '\g<1>22'
-- name: Disable registration
-  replace:
-    path: /root/gitea-data/gitea/conf/app.ini
-    regexp: "(DISABLE_REGISTRATION *= )[a-zA-Z0-9.-]*$"
-    replace: '\g<1>true'
-- name: Set app name
-  replace:
-    path: /root/gitea-data/gitea/conf/app.ini
-    regexp: "(APP_NAME *= ).*$"
-    replace: '\g<1>{{ gitea_app_name }}'
-
-- name: Turn on gitea server
-  docker_container:
-    name: gitea-docker
-    state: started
+- name: Add login source
+  when: login_source_exists.rowcount > 0
+  postgresql_query:
+      db: gitea_db
+      login_host: "{{ docker_host }}"
+      login_user: gitea
+      login_password: "{{ lookup('password', '{{ passwords_dir }}gitea_db_pass') }}"
+      query: >-
+          UPDATE login_source SET cfg = '{"Name":"{{ dc_domain }}",
+              "Host":"{{ docker_host }}",
+              "Port":389,
+              "SecurityProtocol":0,
+              "SkipVerify":false,
+              "BindDN":"cn=gitea-read,dc={{dc_domain}},dc={{dc_domain_top}}",
+              "BindPassword":"{{ lookup("password", "{{ passwords_dir }}gitea_ldap_pass") }}",
+              "UserBase":"ou=users,dc={{dc_domain}},dc={{dc_domain_top}}",
+              "UserDN":"",
+              "AttributeUsername":"uid",
+              "AttributeName":"sn",
+              "AttributeSurname":"",
+              "AttributeMail":"mail",
+              "AttributesInBind":false,
+              "AttributeSSHPublicKey":"",
+              "SearchPageSize":0,
+              "Filter":"(\u0026(uid=%s)(objectClass=person))",
+              "AdminFilter":"(memberof=cn=admin,ou=groups,dc={{dc_domain}},dc={{dc_domain_top}})",
+              "Enabled":true}' WHERE name = '{{ dc_domain }}'
