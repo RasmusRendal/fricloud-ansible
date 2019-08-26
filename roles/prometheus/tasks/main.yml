@@ -1,3 +1,25 @@
+- name: Hash ldap password
+  shell: "openssl passwd -6 {{ lookup('password', '{{ passwords_dir }}grafana_ldap_password') }}"
+  register: ldap_password
+- name: Create ldap grafana user
+  ldap_entry:
+    dn: "cn=grafana-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    objectClass:
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      cn: grafana-read
+      userPassword: "{crypt}{{ ldap_password.stdout }}"
+    bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    bind_pw: "{{ domain_admin_pass }}"
+- name: Ensure ldap password
+  ldap_attr:
+    dn: "cn=grafana-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    name: userPassword
+    values: "{crypt}{{ ldap_password.stdout }}"
+    state: exact
+    bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    bind_pw: "{{ domain_admin_pass }}"
 - name: Create config file
   template:
     src: prometheus.yml
@@ -11,14 +33,68 @@
     volumes:
       - /etc/prometheus.yml:/etc/prometheus/prometheus.yml
     published_ports:
-      "0.0.0.0:{{ prometheus_port }}:9090"
-- name: Create grafana directory
+      "{{ docker_host }}:{{ prometheus_port }}:9090"
+- name: Create grafana data directory
   file:
-    path: /var/grafana
+    path: "{{ grafana_vol_path }}/data"
     state: directory
-    mode: '0755'
+    mode: '0700'
     owner: "472"
     group: "472"
+- name: Create grafana conf directory
+  file:
+    path: "{{ grafana_vol_path }}/conf"
+    state: directory
+    mode: '0700'
+    owner: "472"
+    group: "472"
+- name: Send config
+  template:
+    src: "{{ item }}"
+    dest: "{{ grafana_vol_path }}/conf/{{ item | basename }}"
+  with_fileglob: "../templates/conf/*"
+- name: Create dashboards directory
+  file:
+    path: "{{ grafana_vol_path }}/data/dashboards"
+    state: directory
+    mode: '0700'
+    owner: "472"
+    group: "472"
+- name: Copy dashboards
+  template:
+    src: "{{ item }}"
+    dest: "{{ grafana_vol_path }}/data/dashboards/{{ item | basename }}"
+  with_fileglob: "../templates/dashboards/*"
+- name: Create provisioning directory
+  file:
+    path: "{{ grafana_vol_path }}/conf/provisioning"
+    state: directory
+    mode: '0700'
+    owner: "472"
+    group: "472"
+- name: Create datasources directory
+  file:
+    path: "{{ grafana_vol_path }}/conf/provisioning/datasources"
+    state: directory
+    mode: '0700'
+    owner: "472"
+    group: "472"
+- name: Send config
+  template:
+    src: "conf/provisioning/datasources/prometheus.yaml"
+    dest: "{{ grafana_vol_path }}/conf/provisioning/datasources/prometheus.yaml"
+- name: Create dashboards directory
+  file:
+    path: "{{ grafana_vol_path }}/conf/provisioning/dashboards"
+    state: directory
+    mode: '0700'
+    owner: "472"
+    group: "472"
+- name: Send config
+  template:
+    src: "conf/provisioning/dashboards/dashboards.yaml"
+    dest: "{{ grafana_vol_path }}/conf/provisioning/dashboards/dashboards.yaml"
+
 - name: Create grafana docker
   docker_container:
     name: "grafana"
@@ -28,9 +104,10 @@
     published_ports:
       "0.0.0.0:{{grafana_port}}:3000"
     volumes:
-      "{{grafana_vol_path}}:/var/lib/grafana"
+      - "{{grafana_vol_path}}/data:/var/lib/grafana"
+      - "{{grafana_vol_path}}/conf:/etc/grafana"
     env:
-      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_password }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ lookup('password', '{{ passwords_dir }}grafana_password') }}"
 - name: Install prometheus node exporter
   apt: pkg=prometheus-node-exporter state=present update_cache=true
 - name: Create service for prometheus node exporter
@@ -43,35 +120,3 @@
     daemon_reexec: yes
     enabled: yes
     state: started
-- name: Wait for grafana to be up
-  shell: "/usr/bin/curl localhost:{{ grafana_port }}"
-  register: result
-  retries: 20
-  delay: 3
-  until: result.rc == 0
-- name: Set up prometheus as a data source
-  grafana_datasource:
-    name: "Prometheus"
-    grafana_url: "http://127.0.0.1:{{grafana_port}}"
-    grafana_user: "admin"
-    grafana_password: "{{ grafana_password }}"
-    ds_type: "prometheus"
-    url: "http://{{ docker_host }}:{{prometheus_port}}"
-    state: present
-- name: Copy dashboard to host
-  template:
-    src: dashboard.yml
-    dest: /tmp/dashboard.yml
-- name: Install the main grafana dashboard
-  grafana_dashboard:
-    grafana_url: "http://127.0.0.1:{{grafana_port}}"
-    grafana_user: "admin"
-    grafana_password: "{{ grafana_password }}"
-    path: "/tmp/dashboard.yml"
-    overwrite: yes
-    message: "Initial import of dashboard"
-  ignore_errors: yes
-- name: Delete dashboard again
-  file:
-    path: "/tmp/dashboard.yml"
-    state: absent

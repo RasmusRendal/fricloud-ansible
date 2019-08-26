@@ -1,5 +1,5 @@
 - name: Hash ldap password
-  shell: "openssl passwd -6 {{ lookup('password', '/tmp/passwords/nextcloud_ldap_password') }}"
+  shell: "openssl passwd -6 {{ lookup('password', '{{ passwords_dir }}nextcloud_ldap_password') }}"
   register: ldap_password
 
 - name: Create ldap nextcloud user
@@ -13,10 +13,19 @@
       userPassword: "{crypt}{{ ldap_password.stdout }}"
     bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
     bind_pw: "{{ domain_admin_pass }}"
+- name: Ensure ldap password is correct
+  ldap_attr:
+    dn: "cn=nextcloud-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    name: userPassword
+    values: "{crypt}{{ ldap_password.stdout }}"
+    state: exact
+    bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    bind_pw: "{{ domain_admin_pass }}"
+
 - name: Create database user
   postgresql_user:
     name: nextcloud
-    password: "{{ lookup('password', '/tmp/passwords/nextcloud_db_password') }}"
+    password: "{{ lookup('password', '{{ passwords_dir }}nextcloud_db_password') }}"
     login_host: "{{ docker_host }}"
     login_password: "{{ postgresql_password }}"
 - name: Create database
@@ -39,7 +48,7 @@
     env:
       POSTGRES_DB: nextcloud
       POSTGRES_USER: nextcloud
-      POSTGRES_PASSWORD: "{{ lookup('password', '/tmp/passwords/nextcloud_db_password') }}"
+      POSTGRES_PASSWORD: "{{ lookup('password', '{{ passwords_dir }}nextcloud_db_password') }}"
       POSTGRES_HOST: "{{ docker_host }}"
       #NEXTCLOUD_ADMIN_USER: "admin"
       #NEXTCLOUD_ADMIN_PASSWORD: "{{ nextcloud_admin_password }}"
@@ -55,7 +64,7 @@
   register: installed
 
 - name: Install nextcloud
-  shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ lookup('password', '/tmp/passwords/nextcloud_admin_password') }}"
+  shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ lookup('password', '{{ passwords_dir }}nextcloud_admin_password') }}"
   when: '"false" in installed.stdout'
 - name: Get RMS book
   get_url:
@@ -77,7 +86,7 @@
 - name: Set ldap username
   command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapAgentName "cn=nextcloud-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
 - name: Set ldap password
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapAgentPassword "{{ lookup('password', '/tmp/passwords/nextcloud_ldap_password') }}"
+  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapAgentPassword "{{ lookup('password', '{{ passwords_dir }}nextcloud_ldap_password') }}"
 - name: Set ldap base
   command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapBase "dc={{ dc_domain }},dc={{ dc_domain_top }}"
 - name: Set ldap base
