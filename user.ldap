@@ -5,4 +5,4 @@ objectClass: person
 objectClass: inetOrgPerson
 userPassword: 1234
 uid: testuser
-mail: testuser@fricloudtst.dk
+mail: testuser@fricloudtest.dk
