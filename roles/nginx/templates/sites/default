@@ -1,4 +1,26 @@
 server {
+	listen 80 ;
+	listen [::]:80 ;
+	server_name *.{{ full_domain }};
+
+# redirect to https
+	return 301 https://$host$request_uri;
+}
+
+server {
+	listen 80 ;
+	listen [::]:80 ;
+	server_name {{ full_domain }};
+
+	location /.well_known {
+		proxy_pass http://{{docker_host}}:{{website_port}};
+	}
+
+# redirect to https
+	return 301 https://$host$request_uri;
+}
+
+server {
 	listen [::]:443 ssl;
 	listen 443 ssl;
 	server_name {{ full_domain }};
@@ -23,13 +45,4 @@ server {
 	}
 
 
-}
-
-server {
-	listen 80 ;
-	listen [::]:80 ;
-	server_name {{ full_domain }};
-
-# redirect to https
-	return 301 https://$host$request_uri;
 }
