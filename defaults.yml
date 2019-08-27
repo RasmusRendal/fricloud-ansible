@@ -36,6 +36,7 @@ matrix_riot_port: 9004
 website_port: "9005"
 nginx_http_port: 80
 nginx_https_port: 443
+matrix_webhook_port: 9006
 
 # Docker volumes
 gitea_data_path: "/root/gitea-data"
