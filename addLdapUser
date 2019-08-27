@@ -1,7 +1,8 @@
 #!/bin/bash
-scp user.ldap 192.168.0.166:/tmp/
-ssh 192.168.0.166 "ldapadd -f /tmp/user.ldap -D \"cn=admin,dc=fricloudtest,dc=dk\" -x -w changeme -H ldap:///"
-ssh 192.168.0.166 "ldapmodify -x -w changeme -D \"cn=admin,dc=fricloudtest,dc=dk\" -H ldap:/// << EOF
+IP=192.168.0.166
+scp user.ldap $IP:/tmp/
+ssh $IP "ldapadd -f /tmp/user.ldap -D \"cn=admin,dc=fricloudtest,dc=dk\" -x -w changeme -H ldap:///"
+ssh $IP "ldapmodify -x -w changeme -D \"cn=admin,dc=fricloudtest,dc=dk\" -H ldap:/// << EOF
 dn: cn=user,ou=groups,dc=fricloudtest,dc=dk
 changetype: modify
 add: member
