@@ -1,12 +1,13 @@
 #!/bin/bash
 IP=192.168.0.166
+DC_DOMAIN="dc=fricloudtest,dc=dk"
 scp user.ldap $IP:/tmp/
-ssh $IP "ldapadd -f /tmp/user.ldap -D \"cn=admin,dc=fricloudtest,dc=dk\" -x -w changeme -H ldap:///"
-ssh $IP "ldapmodify -x -w changeme -D \"cn=admin,dc=fricloudtest,dc=dk\" -H ldap:/// << EOF
-dn: cn=user,ou=groups,dc=fricloudtest,dc=dk
+ssh $IP "ldapadd -f /tmp/user.ldap -D \"cn=admin,$DC_DOMAIN\" -x -w changeme -H ldap:///"
+ssh $IP "ldapmodify -x -w changeme -D \"cn=admin,$DC_DOMAIN\" -H ldap:/// << EOF
+dn: cn=user,ou=groups,$DC_DOMAIN
 changetype: modify
 add: member
-member: cn=testuser,ou=users,dc=fricloudtest,dc=dk
+member: cn=testuser,ou=users,$DC_DOMAIN
 EOF"
 #ssh 192.168.0.166 "ldapmodify -x -w changeme -D \"cn=admin,dc=fricloudtest,dc=dk\" -H ldap:/// << EOF
 #dn: cn=admin,ou=groups,dc=fricloudtest,dc=dk
