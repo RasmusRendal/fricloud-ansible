@@ -69,7 +69,7 @@
 - name: Get RMS book
   get_url:
     url: https://www.gnu.org/philosophy/fsfs/rms-essays.pdf
-    checksum: "sha1:808b743c2fff5b6c50f404e856c48776b64e9c4f"
+    checksum: "sha256:a148490b20c0ab97c24c807fc2fc07eb4b003bba39ea2c4702772cf5e8531678"
     dest: /var/nextcloud/core/skeleton/
 - name: Add trusted domain
   shell: "docker exec --user www-data nextcloud php occ config:system:set trusted_domains 0 --value=nextcloud.{{ full_domain }}"
