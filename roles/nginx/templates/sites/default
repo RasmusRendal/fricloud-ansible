@@ -27,7 +27,20 @@ server {
 
 	ssl_certificate {{ nginx_cert }};
 	ssl_certificate_key {{ nginx_cert_key }};
-
+  ssl_prefer_server_ciphers on;
+  ssl_session_cache shared:SSL:20m;
+  ssl_session_timeout 180m;
+  
+  # Only strong ciphers in PFS mode
+  ssl_ciphers ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  
+  # add HSTS, 31536000 == 1 year
+  add_header Strict-Transport-Security "max-age=31536000; includeSubdomains";
+  
+  # Disallow embedding in eg. iframes
+  add_header X-Frame-Options DENY;
+  
 	location / {
 		proxy_pass http://{{ docker_host }}:{{ website_port}};
 	}
