@@ -60,7 +60,7 @@
     delay: 5
 
 - name: Check if nextcloud is installed
-  shell: "sudo docker exec --user www-data nextcloud php occ status"
+  shell: "docker exec --user www-data nextcloud php occ status"
   register: installed
 
 - name: Install nextcloud
@@ -71,47 +71,8 @@
     url: https://www.gnu.org/philosophy/fsfs/rms-essays.pdf
     dest: /var/nextcloud/core/skeleton/
 - name: Add trusted domain
-  shell: "sudo docker exec --user www-data nextcloud php occ config:system:set trusted_domains 0 --value=nextcloud.{{ full_domain }}"
-# I did my best
-- name: Install the ldap extension
-  command: docker exec --user www-data nextcloud php occ app:install user_ldap
-  ignore_errors: yes
-- name: Enable the ldap extension
-  command: docker exec --user www-data nextcloud php occ app:enable user_ldap
-- name: Delete any configs
-  command: docker exec --user www-data nextcloud php occ ldap:delete-config s01
-  ignore_errors: yes
-- name: Create empty ldap config
-  command: docker exec --user www-data nextcloud php occ ldap:create-empty-config
-- name: Set ldap username
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapAgentName "cn=nextcloud-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-- name: Set ldap password
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapAgentPassword "{{ lookup('password', '{{ passwords_dir }}nextcloud_ldap_password') }}"
-- name: Set ldap base
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapBase "dc={{ dc_domain }},dc={{ dc_domain_top }}"
-- name: Set ldap base
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapBaseGroups "dc={{ dc_domain }},dc={{ dc_domain_top }}"
-- name: Set ldap base
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapBaseUsers "dc={{ dc_domain }},dc={{ dc_domain_top }}"
-- name: Set ldap email attribute
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapEmailAttribute "mail"
-- name: Set ldap group filter
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapGroupFilter "(&(|(objectclass=groupOfNames)))"
-- name: Set ldap group filter
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapGroupFilterObjectclass "groupOfNames"
-- name: Set ldap host
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapHost "{{ docker_host }}"
-- name: Set ldap port
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapPort "389"
-- name: Set ldap host
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapHost "{{ docker_host }}"
-- name: Set ldap login filter
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapLoginFilter "(&(|(objectclass=inetOrgPerson)(objectclass=person))(|(uid=%uid)(|(mailPrimaryAddress=%uid)(mail=%uid))))"
-- name: Set ldap display names
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapUserDisplayName "cn"
-- name: Set ldap user filter
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapUserFilter "(|(objectclass=inetOrgPerson)(objectclass=person))"
-- name: Set ldap user filter object class
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapUserFilterObjectclass "inetOrgPerson;person"
-- name: Activates ldap configuration
-  command: docker exec --user www-data nextcloud php occ ldap:set-config s01 ldapConfigurationActive "1"
+  shell: "docker exec --user www-data nextcloud php occ config:system:set trusted_domains 0 --value=nextcloud.{{ full_domain }}"
+- name: Set domain
+  shell: "docker exec --user www-data nextcloud php occ config:system:set overwrite.cli.url --value \"https://nextcloud.{{ full_domain }}\""
+- name: Setup ldap
+  import_tasks: "{{ role_path }}/tasks/ldap.yml"
