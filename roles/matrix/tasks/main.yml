@@ -76,6 +76,7 @@
 - name: Download rest auth provider
   get_url:
     url: https://raw.githubusercontent.com/kamax-matrix/matrix-synapse-rest-auth/master/rest_auth_provider.py
+    checksum: "sha256:05ddd5f629279ea80810673dde3d3964fbd83617c86acf7e63682836e8c0cdd3"
     dest: /tmp/rest_auth_provider.py
 - name: Copy rest auth provider to container
   command: docker cp /tmp/rest_auth_provider.py matrix-synapse:/usr/local/lib/python3.7/
