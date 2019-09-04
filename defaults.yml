@@ -57,7 +57,7 @@ cert_key_path: "{{ certs_dir }}server.key"
 nginx_http_root: "/var/www/html"
 
 # Etc
-gitea_app_name: "FriCloud Gitea"
+gitea_app_name: "Fricloud Gitea"
 
 # Backup
 dc_domain_old: fricloud
