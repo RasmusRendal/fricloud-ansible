@@ -67,6 +67,7 @@
     image: "matrixdotorg/synapse"
     name: "matrix-synapse"
     state: started
+    restart_policy: "{{ docker_restart_policy }}"
     volumes:
       - "{{matrix_vol_path}}/synapse:/data"
     env:
@@ -77,7 +78,6 @@
 - name: Download rest auth provider
   get_url:
     url: https://raw.githubusercontent.com/kamax-matrix/matrix-synapse-rest-auth/master/rest_auth_provider.py
-    checksum: "sha256:05ddd5f629279ea80810673dde3d3964fbd83617c86acf7e63682836e8c0cdd3"
     dest: /tmp/rest_auth_provider.py
 - name: Copy rest auth provider to container
   command: docker cp /tmp/rest_auth_provider.py matrix-synapse:/usr/local/lib/python3.7/
@@ -89,9 +89,9 @@
     dest: "{{matrix_vol_path}}/mxisd/etc/mxisd.yaml"
 - name: Run mxisd docker
   docker_container:
-    restart_policy: "{{ docker_restart_policy }}"
     image: "kamax/mxisd"
     name: "mxisd"
+    restart_policy: "{{ docker_restart_policy }}"
     state: started
     volumes:
       - "{{matrix_vol_path}}/mxisd/var:/var/mxisd"
@@ -105,11 +105,44 @@
     dest: "{{matrix_vol_path}}/riot.json"
 - name: Start riot container
   docker_container:
-    restart_policy: "{{ docker_restart_policy }}"
     name: "riot"
     image: "bubuntux/riot-web"
     state: started
+    restart_policy: "{{ docker_restart_policy }}"
     volumes:
       - "{{ matrix_vol_path }}/riot.json:/etc/riot-web/config.json:ro"
     published_ports:
       "{{ docker_host }}:{{ matrix_riot_port }}:80"
+
+- name: Copy matrix-webhook docker
+  copy:
+    src: "files/matrix-webhook"
+    dest: "/tmp/"
+
+- name: Build matrix-webhook
+  docker_image:
+    build:
+      path: "/tmp/matrix-webhook"
+      pull: yes
+    name: "matrix-webhook"
+    source: build
+# Overwriting matrix users is hard. So if this task fails, we assume it's because the user already exists, and then we additionally assume that the docker container is already running
+- name: Register webhook user
+  shell: "docker exec matrix-synapse register_new_matrix_user -c /data/homeserver.yaml http://localhost:8008 -u CaptainHook -p \"{{ lookup('password', '{{ passwords_dir }}captainhookpass') }}\" --no-admin"
+  register: registerOut
+  ignore_errors: yes
+
+- name: Run matrix-webhook
+  docker_container:
+    name: "matrix-webhook"
+    image: "matrix-webhook"
+    state: started
+    restart_policy: "{{ docker_restart_policy }}"
+    restart: yes
+    published_ports:
+      - "{{ docker_host }}:{{ matrix_webhook_port }}:4785"
+    env:
+      MATRIX_URL: "http://{{ docker_host }}:{{ matrix_synapse_port }}"
+      MATRIX_ID: CaptainHook
+      MATRIX_PW: "{{ lookup('password', '{{ passwords_dir }}captainhookpass') }}"
+      API_KEY: "{{ lookup('password', '{{ passwords_dir }}captainhook_key') }}"
