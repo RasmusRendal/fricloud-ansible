@@ -18,7 +18,7 @@
       image: "nginx"
       state: started
       restart: yes
-      restart_policy: "unless-stopped"
+      restart_policy: "{{ docker_restart_policy }}"
       volumes:
           - "{{ nginx_sites_vol_path }}:/etc/nginx/sites-enabled:ro"
           - "{{ cert_key_path }}:{{ nginx_cert_key }}:ro"

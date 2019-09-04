@@ -62,3 +62,6 @@ gitea_app_name: "Fricloud Gitea"
 # Backup
 dc_domain_old: fricloud
 dc_domain_top_old: dk
+
+# Docker
+docker_restart_policy: unless-stopped

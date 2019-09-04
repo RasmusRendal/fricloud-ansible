@@ -40,6 +40,7 @@
     name: "nextcloud"
     image: "nextcloud"
     state: started
+    restart_policy: "{{ docker_restart_policy }}"
     restart: yes
     published_ports:
       "{{ docker_host }}:{{ nextcloud_port }}:80"

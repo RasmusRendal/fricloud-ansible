@@ -33,6 +33,7 @@
     image: "mailserver"
     state: started
     restart: yes
+    restart_policy: "{{ docker_restart_policy }}"
     domainname: "{{ full_domain }}"
     published_ports:
       - "25:25"
