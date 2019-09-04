@@ -17,5 +17,6 @@
     image: "website"
     state: started
     restart: yes
+    restart_policy: "{{ docker_restart_policy }}"
     published_ports:
       - "{{ docker_host}}:{{ website_port }}:80"

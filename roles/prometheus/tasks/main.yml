@@ -30,6 +30,7 @@
     image: "prom/prometheus"
     state: started
     restart: yes
+    restart_policy: "{{ docker_restart_policy }}"
     volumes:
       - /etc/prometheus.yml:/etc/prometheus/prometheus.yml
     published_ports:
@@ -101,6 +102,7 @@
     image: "grafana/grafana"
     state: started
     restart: yes
+    restart_policy: "{{ docker_restart_policy }}"
     published_ports:
       "{{ docker_host }}:{{grafana_port}}:3000"
     volumes:

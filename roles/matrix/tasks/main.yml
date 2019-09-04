@@ -45,6 +45,7 @@
     image: "matrixdotorg/synapse"
     name: "matrix-synapse-gen"
     state: started
+    restart_policy: "{{ docker_restart_policy }}"
     auto_remove: yes
     env:
       SYNAPSE_CONFIG_PATH: "/data/homeserver.yaml"
@@ -66,6 +67,7 @@
     image: "matrixdotorg/synapse"
     name: "matrix-synapse"
     state: started
+    restart_policy: "{{ docker_restart_policy }}"
     volumes:
       - "{{matrix_vol_path}}/synapse:/data"
     env:
@@ -76,7 +78,6 @@
 - name: Download rest auth provider
   get_url:
     url: https://raw.githubusercontent.com/kamax-matrix/matrix-synapse-rest-auth/master/rest_auth_provider.py
-    checksum: "sha256:05ddd5f629279ea80810673dde3d3964fbd83617c86acf7e63682836e8c0cdd3"
     dest: /tmp/rest_auth_provider.py
 - name: Copy rest auth provider to container
   command: docker cp /tmp/rest_auth_provider.py matrix-synapse:/usr/local/lib/python3.7/
@@ -90,6 +91,7 @@
   docker_container:
     image: "kamax/mxisd"
     name: "mxisd"
+    restart_policy: "{{ docker_restart_policy }}"
     state: started
     volumes:
       - "{{matrix_vol_path}}/mxisd/var:/var/mxisd"
@@ -106,6 +108,7 @@
     name: "riot"
     image: "bubuntux/riot-web"
     state: started
+    restart_policy: "{{ docker_restart_policy }}"
     volumes:
       - "{{ matrix_vol_path }}/riot.json:/etc/riot-web/config.json:ro"
     published_ports:
@@ -134,6 +137,7 @@
     name: "matrix-webhook"
     image: "matrix-webhook"
     state: started
+    restart_policy: "{{ docker_restart_policy }}"
     restart: yes
     published_ports:
       - "{{ docker_host }}:{{ matrix_webhook_port }}:4785"

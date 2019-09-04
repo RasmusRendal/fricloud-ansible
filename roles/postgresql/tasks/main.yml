@@ -8,7 +8,7 @@
       image: postgres
       state: started
       restart: yes
-      restart_policy: "unless-stopped"
+      restart_policy: "{{ docker_restart_policy }}"
       volumes:
         - "{{ postgresql_data_path }}:/var/lib/postgresql/data"
       published_ports:
