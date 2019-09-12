@@ -62,11 +62,13 @@
 
 - name: Check if nextcloud is installed
   shell: "docker exec --user www-data nextcloud php occ status"
-  register: installed
+  register: installed  
+  ignore_errors: True
 
 - name: Install nextcloud
   shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ lookup('password', '{{ passwords_dir }}nextcloud_admin_password') }}"
   when: '"false" in installed.stdout'
+  
 - name: Get RMS book
   get_url:
     url: https://www.gnu.org/philosophy/fsfs/rms-essays.pdf
