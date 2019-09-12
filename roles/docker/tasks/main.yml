@@ -21,3 +21,18 @@
   template:
     src: daemon.json
     dest: /etc/docker/daemon.json
+
+- name: Ensure docker dir
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+
+- name: Ensure docker uses iptables
+  template:
+    src: "iptables-disabled.conf"
+    dest: /etc/systemd/system/docker.service.d/iptables-disabled.conf
+- name: Restart docker service
+  systemd:
+    state: restarted
+    daemon-reload: yes
+    name: docker
