@@ -6,6 +6,9 @@ server {
 	ssl_certificate {{ nginx_cert }};
 	ssl_certificate_key {{ nginx_cert_key }};
 
+	client_max_body_size 1g;
+	fastcgi_request_buffering off;
+
 	location / {
 		proxy_set_header Host $host;
 		proxy_pass http://{{ docker_host }}:{{ nextcloud_port }};
