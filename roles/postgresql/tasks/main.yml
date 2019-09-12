@@ -22,6 +22,7 @@
 - name: Install python lib
   apt:
       pkg:
+          - python-psycopg2
           - python3-psycopg2
       state: present
       update_cache: true
