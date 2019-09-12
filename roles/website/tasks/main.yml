@@ -11,6 +11,13 @@
       pull: yes
     name: "website"
     source: build
+- name: Create folder for registered emails
+  file:
+    path: "{{ emails_location }}"
+    state: touch
+    owner: "65534"
+    group: "65534"
+    mode: "600"
 - name: Run website container
   docker_container:
     name: "website"
@@ -18,5 +25,7 @@
     state: started
     restart: yes
     restart_policy: "{{ docker_restart_policy }}"
+    volumes:
+      - "{{ emails_location }}:/var/emails"
     published_ports:
       - "{{ docker_host}}:{{ website_port }}:80"
