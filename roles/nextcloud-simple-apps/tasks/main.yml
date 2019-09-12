@@ -1,0 +1,28 @@
+- name: write existing apps to variable
+  shell: "docker exec --user www-data nextcloud php occ app:list"
+  register: installedApps
+  ignore_errors: yes
+
+- name: Install NextCloud calendar app
+  shell: "docker exec --user www-data nextcloud php occ app:install calendar" 
+  when: '"calendar" not in installedApps.stdout'
+
+- name: Install NextCloud text app
+  shell: "docker exec --user www-data nextcloud php occ app:install text" 
+  when: '"text" not in installedApps.stdout'
+
+- name: Install NextCloud tasks app
+  shell: "docker exec --user www-data nextcloud php occ app:install tasks" 
+  when: '"tasks" not in installedApps.stdout'
+
+- name: Install NextCloud drawio app
+  shell: "docker exec --user www-data nextcloud php occ app:install drawio" 
+  when: '"drawio" not in installedApps.stdout'
+
+- name: Install NextCloud twofactor_u2f app
+  shell: "docker exec --user www-data nextcloud php occ app:install twofactor_u2f" 
+  when: '"twofactor_u2f" not in installedApps.stdout'
+
+- name: Install NextCloud twofactor_totp app
+  shell: "docker exec --user www-data nextcloud php occ app:install twofactor_totp" 
+  when: '"twofactor_totp" not in installedApps.stdout'

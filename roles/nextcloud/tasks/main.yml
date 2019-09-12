@@ -80,3 +80,6 @@
   shell: "docker exec --user www-data nextcloud php occ config:system:set overwrite.cli.url --value \"https://nextcloud.{{ full_domain }}\""
 - name: Setup ldap
   import_tasks: "{{ role_path }}/tasks/ldap.yml"
+  
+- name: Enable user-controlled encryption
+  shell: "sudo docker exec --user www-data nextcloud php occ app:enable encryption"
