@@ -45,7 +45,6 @@
     image: "matrixdotorg/synapse"
     name: "matrix-synapse-gen"
     state: started
-    restart_policy: "{{ docker_restart_policy }}"
     auto_remove: yes
     env:
       SYNAPSE_CONFIG_PATH: "/data/homeserver.yaml"
