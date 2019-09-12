@@ -23,3 +23,8 @@ scrape_configs:
     basic_auth:
       username: grafana
       password: {{ lookup('password', '{{ passwords_dir }}grafana_metrics_pass') }}
+  - job_name: gitea
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['{{ docker_host }}:{{ gitea_http_port }}']
+    bearer_token: {{ lookup('password', '{{ passwords_dir }}gitea_metrics_key chars=ascii_letters,digits length=60') }}
