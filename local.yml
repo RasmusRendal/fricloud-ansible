@@ -29,12 +29,12 @@
       - role: prometheus
         become: yes
         tags: prometheus
-      - role: nextcloud-simple-apps
-        become: yes
-        tags: nextcloud-simple-apps
       - role: nextcloud
         become: yes
         tags: nextcloud
+      - role: nextcloud-simple-apps
+        become: yes
+        tags: nextcloud-simple-apps
       - role: email
         become: yes
         tags: email
