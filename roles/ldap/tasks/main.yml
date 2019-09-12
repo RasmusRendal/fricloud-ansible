@@ -5,7 +5,7 @@
 
 - name: Install ldap-utils
   apt:
-    pkg: ['ldap-utils', 'python3-ldap']
+    pkg: ['ldap-utils', 'python3-ldap', 'python-ldap']
     state: present
     update_cache: true
 
