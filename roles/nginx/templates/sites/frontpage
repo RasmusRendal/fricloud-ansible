@@ -18,9 +18,6 @@ server {
 	
 	server_name {{ full_domain }};
 	
-        ssl_certificate {{ nginx_cert }};
-        ssl_certificate_key {{ nginx_cert_key }};
-     
 	location / {
 		proxy_pass http://{{ docker_host }}:{{ website_port}};
 	}

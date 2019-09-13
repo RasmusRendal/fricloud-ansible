@@ -4,9 +4,6 @@ server {
 	
 	server_name gitea.{{ full_domain }};
 	
-        ssl_certificate {{ nginx_cert }};
-	ssl_certificate_key {{ nginx_cert_key }};
-
 # For cloning over HTTPS
 	client_max_body_size 8M;
 
