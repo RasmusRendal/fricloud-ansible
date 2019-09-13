@@ -1,7 +1,5 @@
 server {
-# Config for all
-	listen 80 ;
-	listen [::]:80 ;
+# Config for all on HTTPS
 	listen [::]:443 ssl;
 	listen 443 ssl;
 	server_name *.{{ full_domain }} {{ full_domain }};
@@ -24,11 +22,14 @@ server {
 
 
 server {
-# Config for subdomains
-       server_name *.{{ full_domain }}
-
+# Config for subdomains on HTTP
 # frontpage is a bit unique wrt. redirecting to HTTPS
 # therefore, this is only applied to subdomain by default
 # see the frontpage config for more info
-	return 301 https://$host$request_uri;
+     listen 80 ;
+     listen [::]:80 ;
+     server_name *.{{ full_domain }}
+
+# Redirect to HTTPS
+     return 301 https://$host$request_uri;
 }
