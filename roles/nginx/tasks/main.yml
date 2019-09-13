@@ -6,12 +6,18 @@
   template:
       src: nginx.conf
       dest: /root/nginx.conf
+
 - name: Send templates
   template:
     src: '{{ item }}'
     dest: '{{ nginx_sites_vol_path }}/{{ item | basename }}'
   with_fileglob: '../templates/sites/*'
 
+- name: Generate Diffie-Hellman parameters for DHE ciphers (2048 bits)
+  openssl_dhparam:
+    path: "{{ nginx_dhparam }}"
+    size: 2048
+  
 - name: Start nginx docker
   docker_container:
       name: "nginx-docker"
@@ -25,6 +31,7 @@
           - "{{ cert_path }}:{{ nginx_cert }}:ro"
           - "/root/nginx.conf:/etc/nginx/nginx.conf:ro"
           - "{{ nginx_http_root }}:/usr/share/nginx/html:ro"
+          - "{{ nginx_dhparam }}:/etc/ssl/dhparam.pem:ro"
       published_ports:
           - "{{ nginx_https_port }}:443"
           - "{{ nginx_http_port }}:80"

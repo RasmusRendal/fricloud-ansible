@@ -1,11 +1,10 @@
 server {
-	listen [::]:443 ssl;
-	listen 443 ssl;
+	listen [::]:443 ssl http2;
+	listen 443 ssl http2;
+	
 	server_name nextcloud.{{ full_domain }};
 
-	ssl_certificate {{ nginx_cert }};
-	ssl_certificate_key {{ nginx_cert_key }};
-
+# Web client upload size
 	client_max_body_size 1g;
 	fastcgi_request_buffering off;
 
