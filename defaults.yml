@@ -56,6 +56,7 @@ certs_dir: "/var/certs/"
 cert_path: "{{ certs_dir }}server.crt"
 cert_key_path: "{{ certs_dir }}server.key"
 nginx_http_root: "/var/www/html"
+emails_location: "/var/registered_emails"
 
 # Etc
 gitea_app_name: "Fricloud Gitea"

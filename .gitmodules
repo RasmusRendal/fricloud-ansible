@@ -5,6 +5,3 @@
 [submodule "roles/email/files/docker-mailserver"]
 	path = roles/email/files/docker-mailserver
 	url = ssh://git@fricloud.dk:222/fricloud-dev/docker-mailserver.git
-[submodule "roles/matrix/files/matrix-webhook"]
-	path = roles/matrix/files/matrix-webhook
-	url = ssh://git@fricloud.dk:222/fricloud-dev/matrix-webhook.git
