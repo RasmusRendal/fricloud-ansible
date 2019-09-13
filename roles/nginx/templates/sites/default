@@ -1,13 +1,9 @@
 server {
-# Config for all on HTTPS
-	listen [::]:443 ssl;
-	listen 443 ssl;
+# Config for all sites
 	server_name *.{{ full_domain }} {{ full_domain }};
 
 
 # SSL/TLS config, see https://wiki.mozilla.org/Security/Server_Side_TLS
-	ssl_certificate {{ nginx_cert }};
-	ssl_certificate_key {{ nginx_cert_key }};
         ssl_session_cache shared:SSL:10m;
         ssl_session_timeout 1d;
         ssl_session_tickets off;
@@ -18,18 +14,4 @@ server {
 
 # HSTS for two years
         add_header Strict-Transport-Security "max-age=63072000" always;
-}
-
-
-server {
-# Config for subdomains on HTTP
-# frontpage is a bit unique wrt. redirecting to HTTPS
-# therefore, this is only applied to subdomain by default
-# see the frontpage config for more info
-     listen 80 ;
-     listen [::]:80 ;
-     server_name *.{{ full_domain }}
-
-# Redirect to HTTPS
-     return 301 https://$host$request_uri;
 }
