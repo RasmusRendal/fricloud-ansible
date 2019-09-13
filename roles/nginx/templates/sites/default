@@ -1,0 +1,9 @@
+server {
+	listen 80 ;
+	listen [::]:80 ;
+# frontpage has special rules for redirection to https
+	server_name *.{{ full_domain }};
+
+# redirect to https
+	return 301 https://$host$request_uri;
+}
