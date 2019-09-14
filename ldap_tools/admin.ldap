@@ -1,0 +1,8 @@
+dn: cn=testadmin,ou=users,dc=fricloudtest,dc=dk
+cn: testadmin
+sn: testadmin
+objectClass: person
+objectClass: inetOrgPerson
+userPassword: 1234
+uid: testadmin
+mail: testadmin@fricloudtest.dk

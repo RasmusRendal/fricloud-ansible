@@ -1,0 +1,25 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+LDAP_PASS=$(grep -Po "domain_admin_pass: \K.*" $DIR/../defaults.yml)
+DC_DOMAIN=$(grep -Po "dc_domain: \K.*" $DIR/../defaults.yml)
+DC_DOMAIN_TOP=$(grep -Po "dc_domain_top: \K.*" $DIR/../defaults.yml)
+#IP=192.168.0.166
+echo "This script leaks your password, and should only be used for testing purposes."
+echo "But if actually works, it's because your password is in a txt file, so if you're in prod, you have already fucked up."
+echo -n "Please enter server IP: "
+read IP
+FULL_DC_DOMAIN="dc=$DC_DOMAIN,dc=$DC_DOMAIN_TOP"
+
+scp user.ldap $IP:/tmp/
+scp admin.ldap $IP:/tmp/
+
+ssh $IP "ldapadd -f /tmp/user.ldap -D \"cn=admin,$FULL_DC_DOMAIN\" -x -w $LDAP_PASS -H ldap:///"
+ssh $IP "ldapadd -f /tmp/admin.ldap -D \"cn=admin,$FULL_DC_DOMAIN\" -x -w $LDAP_PASS -H ldap:///"
+
+ssh $IP "ldapmodify -x -w $LDAP_PASS -D \"cn=admin,$FULL_DC_DOMAIN\" -H ldap:/// << EOF
+dn: cn=user,ou=groups,$FULL_DC_DOMAIN
+changetype: modify
+add: member
+member: cn=testuser,ou=users,$FULL_DC_DOMAIN
+EOF"
