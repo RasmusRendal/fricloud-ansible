@@ -60,6 +60,7 @@ emails_location: "/var/registered_emails"
 
 # Etc
 gitea_app_name: "Fricloud Gitea"
+git_revision: "{{ lookup('pipe','git rev-parse --short HEAD') }}"
 
 # Backup
 dc_domain_old: fricloud

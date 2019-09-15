@@ -29,3 +29,5 @@
       - "{{ emails_location }}:/var/emails"
     published_ports:
       - "{{ docker_host}}:{{ website_port }}:80"
+    env:
+        GIT_REVISION: "{{ git_revision }}"
