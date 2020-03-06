@@ -456,7 +456,7 @@ database:
   # Arguments to pass to the engine
   args:
     user: "synapse"
-    password: "{{ matrix_db_password }}"
+    password: "{{lookup('password', '{{ passwords_dir }}matrix_db_password')}}"
     database: "synapse"
     host: "{{ docker_host }}"
     cp_min: 5
@@ -816,7 +816,7 @@ uploads_path: "/data/uploads"
 # If set, allows registration of standard or admin accounts by anyone who
 # has the shared secret, even if registration is otherwise disabled.
 #
-registration_shared_secret: "{{ synapse_registration_secret }}"
+#registration_shared_secret: ""
 
 # Set the number of bcrypt rounds used to generate password hash.
 # Larger numbers increase the work factor needed to generate the hash.
@@ -915,7 +915,7 @@ report_stats: true
 # the registration_shared_secret is used, if one is given; otherwise,
 # a secret key is derived from the signing key.
 #
-macaroon_secret_key: "{{ synapse_macaroon_secret_key }}"
+macaroon_secret_key: "{{lookup('password', '{{ passwords_dir }}matrix_macaroon_secret_key')}}"
 
 # Used to enable access token expiration.
 #
@@ -925,7 +925,7 @@ macaroon_secret_key: "{{ synapse_macaroon_secret_key }}"
 # falsification of values. Must be specified for the User Consent
 # forms to work.
 #
-form_secret: "{{ synapse_form_secret }}"
+form_secret: "{{lookup('password', '{{ passwords_dir }}matrix_form_secret')}}"
 
 ## Signing Keys ##
 

@@ -12,7 +12,7 @@
       cn: nextcloud-read
       userPassword: "{crypt}{{ ldap_password.stdout }}"
     bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-    bind_pw: "{{ domain_admin_pass }}"
+    bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 - name: Ensure ldap password is correct
   ldap_attr:
     dn: "cn=nextcloud-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
@@ -20,21 +20,21 @@
     values: "{crypt}{{ ldap_password.stdout }}"
     state: exact
     bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-    bind_pw: "{{ domain_admin_pass }}"
+    bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 
 - name: Create database user
   postgresql_user:
     name: nextcloud
     password: "{{ lookup('password', '{{ passwords_dir }}nextcloud_db_password') }}"
     login_host: "{{ docker_host }}"
-    login_password: "{{ postgresql_password }}"
+    login_password: "{{lookup('password', '{{ passwords_dir }}postgresql_password')}}"
 - name: Create database
   postgresql_db:
     name: nextcloud
     encoding: UTF-8
     owner: nextcloud
     login_host: "{{ docker_host }}"
-    login_password: "{{ postgresql_password }}"
+    login_password: "{{lookup('password', '{{ passwords_dir }}postgresql_password')}}"
 - name: Create nextcloud docker
   docker_container:
     name: "nextcloud"
@@ -62,13 +62,13 @@
 
 - name: Check if nextcloud is installed
   shell: "docker exec --user www-data nextcloud php occ status"
-  register: installed  
+  register: installed
   ignore_errors: True
 
 - name: Install nextcloud
   shell: "docker exec --user www-data nextcloud php occ maintenance:install --admin-user admin --admin-pass {{ lookup('password', '{{ passwords_dir }}nextcloud_admin_password') }}"
   when: '"false" in installed.stdout'
-  
+
 - name: Get RMS book
   get_url:
     url: https://www.gnu.org/philosophy/fsfs/rms-essays.pdf
@@ -80,6 +80,6 @@
   shell: "docker exec --user www-data nextcloud php occ config:system:set overwrite.cli.url --value \"https://nextcloud.{{ full_domain }}\""
 - name: Setup ldap
   import_tasks: "{{ role_path }}/tasks/ldap.yml"
-  
+
 - name: Enable user-controlled encryption
   shell: "sudo docker exec --user www-data nextcloud php occ app:enable encryption"

@@ -6,9 +6,9 @@
       - organizationalRole
     attributes:
       cn: email-read
-      userPassword: "{{ email_ldap_password }}"
+      userPassword: "{{lookup('password', '{{ passwords_dir }}email_ldap_password')}}"
     bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-    bind_pw: "{{ domain_admin_pass }}"
+    bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 - name: Stop exim4 # It takes up the 25 port. So if it's there, let's kill it
   systemd:
     enabled: false
@@ -61,7 +61,7 @@
       LDAP_SERVER_HOST: "{{ docker_host }}"
       LDAP_SEARCH_BASE: "ou=users,dc={{ dc_domain }},dc={{ dc_domain_top }}"
       LDAP_BIND_DN: "cn=email-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-      LDAP_BIND_PW: "{{ email_ldap_password }}"
+      LDAP_BIND_PW: "{{lookup('password', '{{ passwords_dir }}email_ldap_password')}}"
       LDAP_QUERY_FILTER_USER: "(&(objectClass=person)(uid=%u))"
       LDAP_QUERY_FILTER_GROUP: (mailGroupMember=%u)
       LDAP_QUERY_FILTER_ALIAS: (|(&(mailAlias=%s)(objectClass=PostfixBookMailForward))(&(mailAlias=%s)(objectClass=PostfixBookMailAccount)(mailEnabled=TRUE)))
@@ -74,7 +74,7 @@
       SASLAUTHD_LDAP_SERVER: "{{ docker_host }}"
       SASLAUTHD_LDAP_SSL: "0"
       SASLAUTHD_LDAP_BIND_DN: "cn=email-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-      SASLAUTHD_LDAP_PASSWORD: "{{ email_ldap_password }}"
+      SASLAUTHD_LDAP_PASSWORD: "{{lookup('password', '{{ passwords_dir }}email_ldap_password')}}"
       SASLAUTHD_LDAP_SEARCH_BASE: "ou=users,dc={{ dc_domain }},dc={{ dc_domain_top }}"
       SASLAUTHD_LDAP_FILTER: "(&(uid=%U)(objectClass=person))"
       POSTMASTER_ADDRESS: "postmaster@{{ full_domain }}"

@@ -12,7 +12,7 @@
           cn: gitea-read
           userPassword: "{crypt}{{ ldap_password.stdout }}"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      bind_pw: "{{ domain_admin_pass }}"
+      bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 - name: Ensure ldap password is correct
   ldap_attr:
     dn: "cn=gitea-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
@@ -20,21 +20,21 @@
     values: "{crypt}{{ ldap_password.stdout }}"
     state: exact
     bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-    bind_pw: "{{ domain_admin_pass }}"
+    bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 
 - name: Create db user
   postgresql_user:
       name: gitea
       password: "{{ lookup('password', '{{ passwords_dir }}gitea_db_pass') }}"
       login_host: "{{ docker_host }}"
-      login_password: "{{ postgresql_password }}"
+      login_password: "{{lookup('password', '{{ passwords_dir }}postgresql_password')}}"
 - name: Create db
   postgresql_db:
       name: gitea_db
       encoding: UTF-8
       owner: gitea
       login_host: "{{ docker_host }}"
-      login_password: "{{ postgresql_password }}"
+      login_password: "{{lookup('password', '{{ passwords_dir }}postgresql_password')}}"
 - name: Create data dir
   file:
       path: "{{ gitea_data_path }}"

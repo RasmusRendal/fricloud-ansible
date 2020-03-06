@@ -14,7 +14,7 @@
       published_ports:
          "{{ docker_host }}:{{ postgresql_port }}:5432"
       env:
-          POSTGRES_PASSWORD: "{{ postgresql_password }}"
+          POSTGRES_PASSWORD: "{{lookup('password', '{{ passwords_dir }}postgresql_password')}}"
 - name: Postgresql config
   template:
       src: pg_hba.j2

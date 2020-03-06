@@ -1,9 +1,14 @@
 - name: Create database user
   postgresql_user:
     name: synapse
-    password: "{{ matrix_db_password }}"
+    password: "{{lookup('password', '{{ passwords_dir }}matrix_db_password')}}"
     login_host: "{{ docker_host }}"
-    login_password: "{{ postgresql_password }}"
+    login_password: "{{lookup('password', '{{ passwords_dir }}postgresql_password')}}"
+
+- name: Hash ldap password
+  shell: "openssl passwd -6 {{ lookup('password', '{{ passwords_dir }}matrix_ldap_pass') }}"
+  register: matrix_ldap_pass_plain
+
 - name: Create ldap admin user
   ldap_entry:
       dn: cn=mxisd-read,dc={{dc_domain}},dc={{dc_domain_top}}
@@ -12,16 +17,16 @@
           - organizationalRole
       attributes:
           cn: mxisd-read
-          userPassword: "{{ matrix_ldap_pass }}"
+          userPassword: "{{lookup('password', '{{ passwords_dir }}matrix_ldap_password') }}"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      bind_pw: "{{ domain_admin_pass }}"
+      bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 - name: Create database
   postgresql_db:
     name: synapse
     encoding: UTF-8
     owner: synapse
     login_host: "{{ docker_host }}"
-    login_password: "{{ postgresql_password }}"
+    login_password: "{{lookup('password', '{{ passwords_dir }}postgresql_password')}}"
 - name: Create matrix dir
   file:
     path: "{{ matrix_vol_path }}"

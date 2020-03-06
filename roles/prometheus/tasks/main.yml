@@ -11,7 +11,7 @@
       cn: grafana-read
       userPassword: "{crypt}{{ ldap_password.stdout }}"
     bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-    bind_pw: "{{ domain_admin_pass }}"
+    bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 - name: Ensure ldap password
   ldap_attr:
     dn: "cn=grafana-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
@@ -19,7 +19,7 @@
     values: "{crypt}{{ ldap_password.stdout }}"
     state: exact
     bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
-    bind_pw: "{{ domain_admin_pass }}"
+    bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 - name: Create config file
   template:
     src: prometheus.yml

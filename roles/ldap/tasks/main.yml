@@ -20,7 +20,7 @@
   ldap_attr:
       dn: olcDatabase={0}config,cn=config
       name: olcRootPW
-      values: "{{ slapd_pass }}"
+      values: "{{lookup('password', '{{ passwords_dir }}slapd_password')}}"
       state: exact
 - name: slapd modules
   ldap_attr:
@@ -62,7 +62,7 @@
   with_dict:
       olcSuffix: "dc={{dc_domain}},dc={{dc_domain_top}}"
       olcRootDN: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      olcRootPW: "{{domain_admin_pass}}"
+      olcRootPW: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 
 - name: ldap access
   ldap_attr:
@@ -85,7 +85,7 @@
           o: "{{ full_domain }}"
           dc: "{{ dc_domain }}"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      bind_pw: "{{domain_admin_pass}}"
+      bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 
 - name: ldap org admin
   ldap_entry:
@@ -97,7 +97,7 @@
           description:
               LDAP administrator
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      bind_pw: "{{domain_admin_pass}}"
+      bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 
 - name: ldap users orgUnit
   ldap_entry:
@@ -107,7 +107,7 @@
           ou: users
           description: "Standard user group"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      bind_pw: "{{domain_admin_pass}}"
+      bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 
 - name: ldap groups orgUnit
   ldap_entry:
@@ -117,7 +117,7 @@
           ou: Groups
           description: "Different user roles"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      bind_pw: "{{domain_admin_pass}}"
+      bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 
 - name: ldap group user
   ldap_entry:
@@ -128,7 +128,7 @@
           description: "Default user with no extra permissions"
           member: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}} # Can't be empty. We should create a dummy user.
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      bind_pw: "{{domain_admin_pass}}"
+      bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 
 - name: ldap group admin
   ldap_entry:
@@ -139,4 +139,4 @@
           description: "For cool people"
           member: cn=admin,dc={{dc_domain}},dc={{dc_domain_top}} # Can't be empty. We should create a dummy user.
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
-      bind_pw: "{{domain_admin_pass}}"
+      bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
