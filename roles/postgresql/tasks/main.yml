@@ -5,10 +5,11 @@
 - name: Run postgresql docker
   docker_container:
       name: "psql-database"
-      image: postgres
+      image: "postgres:11"
       state: started
       restart: yes
       restart_policy: "{{ docker_restart_policy }}"
+      pull: "{{ docker_pull }}"
       volumes:
         - "{{ postgresql_data_path }}:/var/lib/postgresql/data"
       published_ports:
@@ -35,6 +36,8 @@
 - name: Wait for postgresql to be up
   shell: "/usr/bin/pg_isready -h {{ docker_host }} -p {{ postgresql_port }}"
   register: result
-  retries: 20
+  retries: 50
   delay: 3
   until: result.rc == 0
+- name: Set postgresql password for good
+  shell: "docker exec -u postgres psql-database psql -c \"ALTER USER postgres PASSWORD '{{lookup('password', '{{ passwords_dir }}postgresql_password')}}';\""

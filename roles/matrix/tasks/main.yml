@@ -6,8 +6,8 @@
     login_password: "{{lookup('password', '{{ passwords_dir }}postgresql_password')}}"
 
 - name: Hash ldap password
-  shell: "openssl passwd -6 {{ lookup('password', '{{ passwords_dir }}matrix_ldap_pass') }}"
-  register: matrix_ldap_pass_plain
+  shell: "openssl passwd -6 {{ lookup('password', '{{ passwords_dir }}matrix_ldap_password') }}"
+  register: matrix_ldap_password
 
 - name: Create ldap admin user
   ldap_entry:
@@ -17,9 +17,19 @@
           - organizationalRole
       attributes:
           cn: mxisd-read
-          userPassword: "{{lookup('password', '{{ passwords_dir }}matrix_ldap_password') }}"
+          userPassword: "{crypt}{{ matrix_ldap_password.stdout }}"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
       bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
+- name: Ensure ldap password is correct
+  ldap_attr:
+    dn: "cn=mxisd-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    name: userPassword
+    values: "{crypt}{{ matrix_ldap_password.stdout }}"
+    state: exact
+    bind_dn: "cn=admin,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
+
+
 - name: Create database
   postgresql_db:
     name: synapse
@@ -51,6 +61,7 @@
     name: "matrix-synapse-gen"
     state: started
     auto_remove: yes
+    pull: "{{ docker_pull }}"
     env:
       SYNAPSE_CONFIG_PATH: "/data/homeserver.yaml"
       SYNAPSE_SERVER_NAME: "{{ full_domain }}"
@@ -71,6 +82,7 @@
     image: "matrixdotorg/synapse"
     name: "matrix-synapse"
     state: started
+    pull: "{{ docker_pull }}"
     restart_policy: "{{ docker_restart_policy }}"
     volumes:
       - "{{matrix_vol_path}}/synapse:/data"
@@ -95,7 +107,8 @@
   docker_container:
     image: "kamax/mxisd"
     name: "mxisd"
-    restart_policy: "{{ docker_restart_policy }}"
+    pull: "{{ docker_pull }}"
+    auto_remove: yes
     state: started
     volumes:
       - "{{matrix_vol_path}}/mxisd/var:/var/mxisd"
@@ -113,6 +126,7 @@
     image: "bubuntux/riot-web"
     state: started
     restart_policy: "{{ docker_restart_policy }}"
+    pull: "{{ docker_pull }}"
     volumes:
       - "{{ matrix_vol_path }}/riot.json:/etc/riot-web/config.json:ro"
     published_ports:

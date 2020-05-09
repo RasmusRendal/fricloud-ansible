@@ -17,7 +17,7 @@
   openssl_dhparam:
     path: "{{ nginx_dhparam }}"
     size: 2048
-  
+
 - name: Start nginx docker
   docker_container:
       name: "nginx-docker"
@@ -25,6 +25,7 @@
       state: started
       restart: yes
       restart_policy: "{{ docker_restart_policy }}"
+      pull: "{{ docker_pull }}"
       volumes:
           - "{{ nginx_sites_vol_path }}:/etc/nginx/sites-enabled:ro"
           - "{{ cert_key_path }}:{{ nginx_cert_key }}:ro"

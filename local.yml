@@ -1,4 +1,4 @@
-- hosts: fricloudtest
+- hosts: all
   vars_files:
     - defaults.yml
   roles:

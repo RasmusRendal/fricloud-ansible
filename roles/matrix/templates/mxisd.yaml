@@ -71,7 +71,7 @@ ldap:
     host: '{{ docker_host }}'
     port: 389
     bindDn: 'CN=mxisd-read,DC={{ dc_domain }},DC={{ dc_domain_top }}'
-    bindPassword: '{{ matrix_ldap_pass_plain }}'
+    bindPassword: "{{lookup('password', '{{ passwords_dir }}matrix_ldap_password') }}"
     baseDNs:
       - 'OU=users,DC={{ dc_domain }},DC={{ dc_domain_top }}'
   attribute:

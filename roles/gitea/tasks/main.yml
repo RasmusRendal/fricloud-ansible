@@ -55,6 +55,7 @@
       image: gitea/gitea:1
       state: started
       restart_policy: "{{ docker_restart_policy }}"
+      pull: "{{ docker_pull }}"
       published_ports:
           - "{{ docker_host }}:{{ gitea_http_port }}:3000"
           - "{{ gitea_ssh_port }}:22"

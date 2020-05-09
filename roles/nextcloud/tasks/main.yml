@@ -38,10 +38,11 @@
 - name: Create nextcloud docker
   docker_container:
     name: "nextcloud"
-    image: "nextcloud"
+    image: "nextcloud:18"
     state: started
     restart_policy: "{{ docker_restart_policy }}"
     restart: yes
+    pull: "yes"
     published_ports:
       "{{ docker_host }}:{{ nextcloud_port }}:80"
     volumes:
@@ -80,6 +81,7 @@
   shell: "docker exec --user www-data nextcloud php occ config:system:set overwrite.cli.url --value \"https://nextcloud.{{ full_domain }}\""
 - name: Setup ldap
   import_tasks: "{{ role_path }}/tasks/ldap.yml"
-
+- name: Upgrade if necesarry
+  shell: "docker exec --user www-data nextcloud php occ upgrade"
 - name: Enable user-controlled encryption
   shell: "sudo docker exec --user www-data nextcloud php occ app:enable encryption"
