@@ -11,18 +11,18 @@
 
 - name: Create ldap admin user
   ldap_entry:
-      dn: cn=mxisd-read,dc={{dc_domain}},dc={{dc_domain_top}}
+      dn: cn=matrix-read,dc={{dc_domain}},dc={{dc_domain_top}}
       objectClass:
           - simpleSecurityObject
           - organizationalRole
       attributes:
-          cn: mxisd-read
+          cn: matrix-read
           userPassword: "{crypt}{{ matrix_ldap_password.stdout }}"
       bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
       bind_pw: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
 - name: Ensure ldap password is correct
   ldap_attr:
-    dn: "cn=mxisd-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    dn: "cn=matrix-read,dc={{ dc_domain }},dc={{ dc_domain_top }}"
     name: userPassword
     values: "{crypt}{{ matrix_ldap_password.stdout }}"
     state: exact
@@ -47,14 +47,6 @@
     state: directory
     owner: "991"
     group: "991"
-- name: Create synapse dir
-  file:
-    path: "{{ matrix_vol_path }}/mxisd/var"
-    state: directory
-- name: Create synapse dir
-  file:
-    path: "{{ matrix_vol_path }}/mxisd/etc"
-    state: directory
 - name: Create matrix keys
   docker_container:
     image: "matrixdotorg/synapse"
@@ -99,23 +91,6 @@
   command: docker cp /tmp/rest_auth_provider.py matrix-synapse:/usr/local/lib/python3.7/
 - name: Start matrix docker again
   command: docker start matrix-synapse
-- name: Create mxisd config
-  template:
-    src: mxisd.yaml
-    dest: "{{matrix_vol_path}}/mxisd/etc/mxisd.yaml"
-- name: Run mxisd docker
-  docker_container:
-    image: "kamax/mxisd"
-    name: "mxisd"
-    pull: "{{ docker_pull }}"
-    auto_remove: yes
-    state: started
-    volumes:
-      - "{{matrix_vol_path}}/mxisd/var:/var/mxisd"
-      - "{{matrix_vol_path}}/mxisd/etc:/etc/mxisd"
-    published_ports:
-      "{{ docker_host }}:8090:8090"
-
 - name: Create riot config
   template:
     src: riot.json

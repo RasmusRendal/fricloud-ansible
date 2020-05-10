@@ -1134,24 +1134,19 @@ password_config:
 #   #password_reset_template_failure_html: password_reset_failure.html
 
 password_providers:
-- module: "rest_auth_provider.RestAuthProvider"
+- module: "ldap_auth_provider.LdapAuthProvider"
   config:
-    endpoint: "http://{{ docker_host }}:8090"
-
-    #password_providers:
-#    - module: "ldap_auth_provider.LdapAuthProvider"
-#      config:
-#        enabled: true
-#        uri: "ldap://ldap.example.com:389"
-#        start_tls: true
-#        base: "ou=users,dc=example,dc=com"
-#        attributes:
-#           uid: "cn"
-#           mail: "email"
-#           name: "givenName"
-#        #bind_dn:
-#        #bind_password:
-#        #filter: "(objectClass=posixAccount)"
+    enabled: true
+    uri: "ldap://{{ docker_host }}:389"
+    start_tls: false
+    base: "ou=users,dc={{ dc_domain }},dc={{ dc_domain_top }}"
+    attributes:
+       uid: "uid"
+       name: "sn"
+       mail: "mail"
+    bind_dn: "cn=admin,dc={{dc_domain}},dc={{dc_domain_top}}"
+    bind_password: "{{lookup('password', '{{ passwords_dir }}ldap_domain_password')}}"
+    #filter: "(objectClass=posixAccount)"
 
 
 

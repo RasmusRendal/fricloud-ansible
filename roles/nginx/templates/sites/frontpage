@@ -7,7 +7,7 @@ server {
 	location /.well_known {
 		 proxy_pass http://{{docker_host}}:{{website_port}};
 	}
-     
+
 # redirect to https if not going to .well-known
 	return 301 https://$host$request_uri;
 }
@@ -15,21 +15,15 @@ server {
 server {
 	listen [::]:443 ssl http2;
 	listen 443 ssl http2;
-	
+
 	server_name {{ full_domain }};
-	
+
 	location / {
 		proxy_set_header Host $host;
 		proxy_set_header X-Forwarded-For $remote_addr;
 		proxy_pass http://{{ docker_host }}:{{ website_port}};
 	}
- 
-	location /_matrix/identity {
-		proxy_set_header Host $host;
-		proxy_set_header X-Forwarded-For $remote_addr;
-		proxy_pass http://{{ docker_host }}:8090/_matrix/identity;
-	}
- 
+
 	location /_matrix {
 		proxy_set_header Host $host;
 		proxy_set_header X-Forwarded-For $remote_addr;
