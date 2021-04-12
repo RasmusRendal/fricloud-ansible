@@ -41,6 +41,9 @@
       - role: matrix
         become: yes
         tags: matrix
+      - role: riot
+        become: yes
+        tags: riot
       - role: restore
         become: yes
         tags:

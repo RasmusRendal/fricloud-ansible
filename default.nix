@@ -4,6 +4,6 @@ stdenv.mkDerivation {
   name = "fricloud-ansible";
   src = ./.;
 
-  buildInputs = [ ansible ];
+  buildInputs = [ ansible_2_9 ];
 
 }

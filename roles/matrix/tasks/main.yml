@@ -87,22 +87,8 @@
   get_url:
     url: https://raw.githubusercontent.com/kamax-matrix/matrix-synapse-rest-auth/master/rest_auth_provider.py
     dest: /tmp/rest_auth_provider.py
+    mode: 666
 - name: Copy rest auth provider to container
-  command: docker cp /tmp/rest_auth_provider.py matrix-synapse:/usr/local/lib/python3.7/
+  command: docker cp /tmp/rest_auth_provider.py matrix-synapse:/usr/local/lib/python3.8/
 - name: Start matrix docker again
   command: docker start matrix-synapse
-- name: Create riot config
-  template:
-    src: riot.json
-    dest: "{{matrix_vol_path}}/riot.json"
-- name: Start riot container
-  docker_container:
-    name: "riot"
-    image: "bubuntux/riot-web"
-    state: started
-    restart_policy: "{{ docker_restart_policy }}"
-    pull: "{{ docker_pull }}"
-    volumes:
-      - "{{ matrix_vol_path }}/riot.json:/etc/riot-web/config.json:ro"
-    published_ports:
-      "{{ docker_host }}:{{ matrix_riot_port }}:80"

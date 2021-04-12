@@ -1,0 +1,15 @@
+- name: Create riot config
+  template:
+    src: riot.json
+    dest: "{{matrix_vol_path}}/riot.json"
+- name: Start riot container
+  docker_container:
+    name: "riot"
+    image: "bubuntux/riot-web"
+    state: started
+    restart_policy: "{{ docker_restart_policy }}"
+    pull: "{{ docker_pull }}"
+    volumes:
+      - "{{ matrix_vol_path }}/riot.json:/etc/riot-web/config.json:ro"
+    published_ports:
+      "{{ docker_host }}:{{ matrix_riot_port }}:80"
